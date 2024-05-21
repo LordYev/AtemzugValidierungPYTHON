@@ -10,5 +10,3 @@ from gui import AtemzugValidierungGUI
 if __name__ == "__main__":  # =true, wenn Skript direkt ausgeführt wird
     app = AtemzugValidierungGUI()
     app.mainloop()
-
-# TEST MIT GITHUB

@@ -4,6 +4,7 @@ UPDATE DATE OF THIS FILE
 Yevgeniy Gennadijovic Palamarchuk
 """
 import numpy as np  # numpy ist eine Bibliothek für numerische Berechnungen in Python
+from collections import Counter
 import matplotlib.pyplot as plt  # Bibliothek für die Erstellung von Grafiken und Diagrammen in Python
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from scipy.io import loadmat  # ermöglicht das Lesen und Schreiben von MATLAB-Dateien
@@ -91,7 +92,7 @@ class AtemzugValidierungLogic:
         return ventilation_start, ventilation_end
 
     # Funktion zum Ermitteln des durchschnittlichen Drucks
-    def get_average_pressure(self):
+    '''def get_average_pressure(self):
         average_pressure = 0
         pressure = 0
         pressure_count = 0
@@ -104,11 +105,29 @@ class AtemzugValidierungLogic:
         if pressure_count > 0:
             average_pressure = pressure / pressure_count
 
-        return average_pressure
+        return average_pressure'''
+    # Funktion zum Ermitteln des am meist vorkommenden Drucks
+    def get_most_common_pressure(self):
+        start_index, end_index = self.get_ventilation_start_end()
+
+        # Druckwerte werden in Liste pressure_values gespeichert
+        pressure_values = self.mask_edf_data[0, start_index:end_index]
+
+        # Gefilterte Liste mit Druckwerten > 1
+        filtered_pressures = [p for p in pressure_values if p > 1]
+
+        # Histogramm wird erstellt
+        counts = Counter(filtered_pressures)
+
+        # Meist vorkommender Druckwert wird ermittelt
+        most_frequent_pressure = counts.most_common(1)[0][0]
+        #print("Häufigster Druck: " + str(most_frequent_pressure))
+
+        return most_frequent_pressure
 
     # Funktion zum Festlegen des Grenzwertes, welcher überschritten werden muss, um Atemzüge zu ermitteln
     def get_pressure_limit(self):
-        average_pressure = self.get_average_pressure()
+        average_pressure = self.get_most_common_pressure()
         pressure_limit = average_pressure + (0.6 * average_pressure)
 
         return pressure_limit
@@ -119,7 +138,8 @@ class AtemzugValidierungLogic:
     def set_starting_point(self, starting_point_entry, starting_point, backward, forward):
         start_point = float(starting_point)
 
-        # Hier wird geschaut ob der Benutzer rückwerts oder vorwärts im Plot navigieren möchte, oder ob nur ein Intervall festgelegt wurde
+        # Hier wird geschaut ob der Benutzer rückwerts oder vorwärts im Plot navigieren möchte,
+        # oder ob nur ein Intervall festgelegt wurde
         if backward is True:
             self.starting_point = start_point - self.interval
         elif forward is True:
