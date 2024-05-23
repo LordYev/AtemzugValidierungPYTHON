@@ -91,44 +91,26 @@ class AtemzugValidierungLogic:
 
         return ventilation_start, ventilation_end
 
-    # Funktion zum Ermitteln des durchschnittlichen Drucks
-    '''def get_average_pressure(self):
-        average_pressure = 0
-        pressure = 0
-        pressure_count = 0
-        start_index, end_index = self.get_ventilation_start_end()
-
-        for i in range(start_index, end_index):
-            pressure += self.mask_edf_data[0, i]
-            pressure_count += 1
-
-        if pressure_count > 0:
-            average_pressure = pressure / pressure_count
-
-        return average_pressure'''
     # Funktion zum Ermitteln des am meist vorkommenden Drucks
-    def get_most_common_pressure(self):
+    def get_most_frequent_pressure(self):
         start_index, end_index = self.get_ventilation_start_end()
 
-        # Druckwerte werden in Liste pressure_values gespeichert
-        pressure_values = self.mask_edf_data[0, start_index:end_index]
+        # Druckwerte >= 1 werden in Liste pressure_values durch List Comprehension gespeichert
+        pressure_values = [i for i in self.mask_edf_data[0, start_index:end_index] if i >= 0]
 
-        # Gefilterte Liste mit Druckwerten > 1
-        filtered_pressures = [p for p in pressure_values if p > 1]
-
-        # Histogramm wird erstellt
-        counts = Counter(filtered_pressures)
+        # Histogramm wird erstellt. Häufigkeit der Druckwerte wird gezählt
+        counted_pressure_values = Counter(pressure_values)
 
         # Meist vorkommender Druckwert wird ermittelt
-        most_frequent_pressure = counts.most_common(1)[0][0]
-        #print("Häufigster Druck: " + str(most_frequent_pressure))
+        most_frequent_pressure = counted_pressure_values.most_common(1)[0][0]
+        print("Häufigster Druck: " + str(most_frequent_pressure))
 
         return most_frequent_pressure
 
     # Funktion zum Festlegen des Grenzwertes, welcher überschritten werden muss, um Atemzüge zu ermitteln
     def get_pressure_limit(self):
-        average_pressure = self.get_most_common_pressure()
-        pressure_limit = average_pressure + (0.6 * average_pressure)
+        most_frequent_pressure = self.get_most_frequent_pressure()
+        pressure_limit = most_frequent_pressure + (0.6 * most_frequent_pressure)
 
         return pressure_limit
 
