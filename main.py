@@ -1,8 +1,3 @@
-"""
-UPDATE DATE OF THIS FILE
-
-Yevgeniy Gennadijovic Palamarchuk
-"""
 from gui import AtemzugValidierungGUI
 
 

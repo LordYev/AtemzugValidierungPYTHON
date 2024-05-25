@@ -1,11 +1,7 @@
-"""
-UPDATE DATE OF THIS FILE
-
-Yevgeniy Gennadijovic Palamarchuk
-"""
 import tkinter as tk  # tkinter wird zum Bau der GUI verwendet
 from tkinter import filedialog  # filedialog = Modul aus tkinter um Dateien auswählen zu können
 from logic import AtemzugValidierungLogic
+from breath import AtemzugValidierungBreaths
 import os
 
 
@@ -14,6 +10,7 @@ class AtemzugValidierungGUI(tk.Tk):
     def __init__(self, master=None):
         super().__init__(master)                        # erstellt das Hauptfenster "self"
         self.logic = AtemzugValidierungLogic()
+        self.breath = AtemzugValidierungBreaths()
         self.mask_edf_path = None
         self.device_edf_path = None                           # Instanzvariable um den Pfad der EDF-Datei speichern
         self.title("Atemzug Validierung")               # legt Titel für Hauptfenster fest
@@ -137,13 +134,13 @@ class AtemzugValidierungGUI(tk.Tk):
         def close_window():
             try:
                 # Eingabewerte werden übergeben
-                self.logic.start_analyses_index = start_analyses_index_entry.get()
-                self.logic.end_analyses_index = end_analyses_index_entry.get()
+                self.breath.start_analyses_index = start_analyses_index_entry.get()
+                self.breath.end_analyses_index = end_analyses_index_entry.get()
 
-                # Grenzwert wird berechnet
-                self.logic.pressure_limit = self.logic.get_pressure_limit()
                 # Atemzüge werden ermittelt und in Liste gespeichert
-                self.logic.breath_list = self.logic.get_breaths()
+                self.breath.breath_list = self.breath.get_breaths()
+                # Übergibt Grenzwert aus breath an logic
+                self.logic.pressure_limit = self.breath.pressure_limit
 
                 # Entsperrt Buttons
                 self.interval_button.config(state="normal")
@@ -151,11 +148,12 @@ class AtemzugValidierungGUI(tk.Tk):
                 self.full_graph_button.config(state="normal")
 
                 ##############################################################################
-                '''print(f"Anzahl der Atemzüge: {len(self.logic.breath_list)}")
+                '''# gibt alle Atemzüge + durchschnittlichen Druck und Grenzwert aus
+                print(f"Anzahl der Atemzüge: {len(self.breath.breath_list)}")
     
-                x = self.logic.get_average_pressure()
-                y = self.logic.get_pressure_limit()
-                for i in self.logic.breath_list:
+                x = self.breath.get_most_frequent_pressure()
+                y = self.breath.get_pressure_limit()
+                for i in self.breath.breath_list:
                     print(i)
                 print("Durchschnittlicher Druck")
                 print(x)
@@ -223,6 +221,16 @@ class AtemzugValidierungGUI(tk.Tk):
 
                 self.logic.read_edf_file(mask_edf_file_path, device_edf_file_path)
                 self.update_canvas()
+
+                # Übergibt Daten aus logic an breath
+                # Aus breath kann man nicht direkt z.B. auf Daten in mask_edf_meta_data in logic zugreifen -> None
+                self.breath.mask_edf_meta_data = self.logic.mask_edf_meta_data
+                self.breath.mask_edf_data = self.logic.mask_edf_data
+
+                if self.logic.mask_edf_data is None:
+                    print("logic Data is None")
+                else:
+                    print("logic Data is NOT None")
 
                 self.show_input_window()
 
