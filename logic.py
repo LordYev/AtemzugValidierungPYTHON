@@ -28,7 +28,6 @@ class AtemzugValidierungLogic:
         self.time_difference_end = None
         self.pressure_limit = None
 
-
     # Funktion zur Übergabe der Eingabe des Benutzers an die Variable starting_point
     def set_starting_point(self, starting_point_entry, starting_point, backward, forward):
         start_point = float(starting_point)
@@ -49,7 +48,8 @@ class AtemzugValidierungLogic:
     # Funktion zum Aufrufen mehrerer Funktionen zeitgleich
     def use_multiple_funcs(self, starting_point_entry, starting_point, backward, forward):
         self.set_starting_point(starting_point_entry, starting_point, backward, forward)
-        self.plot_edf_interval(self.mask_edf_meta_data, self.mask_edf_data, self.device_edf_meta_data, self.device_edf_data, self.starting_point, self.interval)
+        self.plot_edf_interval(self.mask_edf_meta_data, self.mask_edf_data, self.device_edf_meta_data, self.device_edf_data, self.starting_point,
+                               self.interval)
 
     # Funktion zum Erstellen einer Matplotlib-Figur
     def create_figure(self):
@@ -167,7 +167,8 @@ class AtemzugValidierungLogic:
             ax.axhline(self.pressure_limit, label='Grenzwert', color='green', linestyle='dashed')
             ax.legend(loc='upper center', ncol=3)
 
-            ##########################################TEST ATEMZUG MARKIERUNG#########################
+            ###################################################################
+            # TEST ATEMZUG MARKIERUNG
             # Atemzug Nr. 120 und 121. NACHFRAGEN
             ax.axvline(15901.76, color='cyan')
             ax.axvline(15901.84, color='orange')

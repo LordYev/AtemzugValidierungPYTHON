@@ -8,13 +8,13 @@ import os
 class AtemzugValidierungGUI(tk.Tk):
     # Konstruktor der Klasse AtemzugValidierungGUI()
     def __init__(self, master=None):
-        super().__init__(master)                        # erstellt das Hauptfenster "self"
+        super().__init__(master)  # erstellt das Hauptfenster "self"
         self.logic = AtemzugValidierungLogic()
         self.breath = AtemzugValidierungBreaths()
         self.mask_edf_path = None
-        self.device_edf_path = None                           # Instanzvariable um den Pfad der EDF-Datei speichern
-        self.title("Atemzug Validierung")               # legt Titel für Hauptfenster fest
-        self.geometry("1250x600")                       # legt Fenster größe fest
+        self.device_edf_path = None  # Instanzvariable um den Pfad der EDF-Datei speichern
+        self.title("Atemzug Validierung")  # legt Titel für Hauptfenster fest
+        self.geometry("1250x600")  # legt Fenster größe fest
         self.starting_point_entry = None
         self.starting_point = None
         self.forward = False
@@ -74,7 +74,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
         # Button um die ganze Grafik wieder anzuzeigen
         self.full_graph_button = tk.Button(self, text="Gesamten Graphen anzeigen",
-                                      command=lambda: self.plot_back_edf_file(self.mask_edf_path, self.device_edf_path), state="disabled")
+                                           command=lambda: self.plot_back_edf_file(self.mask_edf_path, self.device_edf_path), state="disabled")
         self.full_graph_button.grid(row=4, column=0, padx=5, pady=5, sticky="w")
 
         # Button zum Anzeigen eines Intervalls in der Messung
@@ -100,7 +100,7 @@ class AtemzugValidierungGUI(tk.Tk):
     # Funktion um im Plot rückwärts zu navigieren
     def go_backwards(self):
         self.backward = True
-        self.logic.use_multiple_funcs(self.starting_point_entry,self.starting_point, self.backward, self.forward)
+        self.logic.use_multiple_funcs(self.starting_point_entry, self.starting_point, self.backward, self.forward)
         self.starting_point = self.logic.starting_point
         self.backward = False
 
@@ -167,7 +167,7 @@ class AtemzugValidierungGUI(tk.Tk):
                 print(f"\033[93mFehler bei Eingabe von Zeiten: {error_code}\033[0m")
 
         label = tk.Label(top_frame, text="Bitte geben Sie zwei Zeitpunkte an. \n\n Startzeitpunkt muss VOR der Beatmung liegen! \n"
-                                            "Endzeitpunk muss NACH der Beatmung liegen!")
+                                         "Endzeitpunk muss NACH der Beatmung liegen!")
         label.pack(padx=5, pady=5)
 
         start_label = tk.Label(first_bottom_frame, text="Start:")
@@ -186,10 +186,11 @@ class AtemzugValidierungGUI(tk.Tk):
         confirm_button.pack(side='left', padx=5, pady=5)
 
         input_window.lift(self)
-        #input_window.grab_set() # das soll eigentlich den Fokus auf das Fenster direkt richten
+        # input_window.grab_set()
+        # das soll eigentlich den Fokus auf das Fenster direkt richten
         input_window.after(100, lambda: input_window.lift(self))
 
-    # Funktion zum Auswählen eines Dateipfades/einer MAT-Datei und Anzeigen des MAT-Graphen
+    # Funktion zum Auswählen eines Dateipfades/einer MAT-Datei und Anzeigen des MAT-Grafen
     def load_mat_file(self, mat_file_path_text):
         mat_file_path = filedialog.askopenfilename(filetypes=[("MAT Files", "*.mat")])
         if mat_file_path:
@@ -235,7 +236,7 @@ class AtemzugValidierungGUI(tk.Tk):
                 self.show_input_window()
 
                 # Sperrt beide buttons
-                # Hier werden die Buttons erneut gesperrt, da diese Funktion zum wiederholten Plotten verwendet wird
+                # hier werden die Buttons erneut gesperrt, da diese Funktion zum wiederholten Plotten verwendet wird
                 self.backwards_button.config(state="disabled")
                 self.forwards_button.config(state="disabled")
 
