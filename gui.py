@@ -96,11 +96,11 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath_list_area = ttk.Treeview(self, columns=("column_number", "column_start", "column_end", "column_is_breath", "column_comment"), height=15)
 
         self.breath_list_area.column("#0", width=0, stretch=tk.NO)    # Phantomspalte. Ist immer da, wird aber nicht benötigt
-        self.breath_list_area.column("column_number", anchor="w", width=80, minwidth=80)
-        self.breath_list_area.column("column_start", anchor="w", width=100, minwidth=100)
-        self.breath_list_area.column("column_end", anchor="w", width=100, minwidth=100)
-        self.breath_list_area.column("column_is_breath", anchor="center", width=70, minwidth=70)
-        self.breath_list_area.column("column_comment", anchor="e", width=500, minwidth=500)
+        self.breath_list_area.column("column_number", anchor="e", width=40, minwidth=40)
+        self.breath_list_area.column("column_start", anchor="e", width=100, minwidth=100)
+        self.breath_list_area.column("column_end", anchor="e", width=100, minwidth=100)
+        self.breath_list_area.column("column_is_breath", anchor="e", width=70, minwidth=70)
+        self.breath_list_area.column("column_comment", anchor="w", width=600, minwidth=600)
 
         #self.breath_list_area.heading("#0", text="Test", anchor="w")
         self.breath_list_area.heading("column_number", text="Nr", anchor="w")
