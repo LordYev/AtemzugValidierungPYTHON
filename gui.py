@@ -1,4 +1,5 @@
 import tkinter as tk  # tkinter wird zum Bau der GUI verwendet
+from tkinter import ttk # ermöglicht den Bau des Treeview (Listenbereich mit den Atemzügen)
 from tkinter import filedialog  # filedialog = Modul aus tkinter um Dateien auswählen zu können
 from logic import AtemzugValidierungLogic
 from breath import AtemzugValidierungBreaths
@@ -14,7 +15,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.mask_edf_path = None
         self.device_edf_path = None  # Instanzvariable um den Pfad der EDF-Datei speichern
         self.title("Atemzug Validierung")  # legt Titel für Hauptfenster fest
-        self.geometry("1250x600")  # legt Fenster größe fest
+        self.geometry("1250x1000")  # legt Fenster größe fest
         self.starting_point_entry = None
         self.starting_point = None
         self.forward = False
@@ -24,25 +25,26 @@ class AtemzugValidierungGUI(tk.Tk):
         self.interval_button = None
         self.save_interval_button = None
         self.full_graph_button = None
+        self.breath_list_area = None
 
         # Folgend werden GUI Elemente gebaut
-        self.load_mat_file_button = tk.Button(self, text="MAT Datei auswählen", command=lambda: self.load_mat_file(self.mat_file_path_text))
-        self.load_mat_file_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        '''self.load_mat_file_button = tk.Button(self, text="MAT Datei auswählen", command=lambda: self.load_mat_file(self.mat_file_path_text))
+        self.load_mat_file_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")'''
 
         self.load_edf_file_button = tk.Button(self, text="EDF Ordner auswählen", command=lambda: self.load_edf_files(self.folder_path_text))
         self.load_edf_file_button.grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
-        self.mat_file_path_text = tk.Text(self, height=1, width=100, wrap=tk.NONE)
-        self.mat_file_path_text.grid(row=0, column=1, columnspan=10, padx=5, pady=5, sticky="w")
+        '''self.mat_file_path_text = tk.Text(self, height=1, width=100, wrap=tk.NONE)
+        self.mat_file_path_text.grid(row=0, column=1, columnspan=10, padx=5, pady=5, sticky="w")'''
 
         self.folder_path_text = tk.Text(self, height=1, width=100, wrap=tk.NONE)
         self.folder_path_text.grid(row=1, column=1, columnspan=10, padx=5, pady=5, sticky="w")
 
-        # ruft die Funktion gui_edf_plot auf
-        self.gui_edf_plot()
+        self.gui_edf_plot_area()
+        self.gui_list_area()
 
     # Funktion zur erstellung der GUI Elemente für den EDF-Graphen
-    def gui_edf_plot(self):
+    def gui_edf_plot_area(self):
         # Label für starting_point_entry
         starting_point_label = tk.Label(self, text="Startpunkt des Intervalls:")
         starting_point_label.grid(row=3, column=0, padx=5, pady=5, sticky="w")
@@ -88,6 +90,45 @@ class AtemzugValidierungGUI(tk.Tk):
         # Button zum vorwärts Navigieren im Plot
         self.forwards_button = tk.Button(self, text=">", command=lambda: self.go_forwards(), state="disabled")
         self.forwards_button.grid(row=4, column=2, padx=50, pady=5, sticky="w")
+
+    # Funktion zur erstellung des Bereiches, in dem die Liste der Atemzüge angezeigt werden soll
+    def gui_list_area(self):
+        self.breath_list_area = ttk.Treeview(self, columns=("column_number", "column_start", "column_end", "column_is_breath", "column_comment"), height=15)
+
+        self.breath_list_area.column("#0", width=0, stretch=tk.NO)    # Phantomspalte. Ist immer da, wird aber nicht benötigt
+        self.breath_list_area.column("column_number", anchor="w", width=80, minwidth=80)
+        self.breath_list_area.column("column_start", anchor="w", width=100, minwidth=100)
+        self.breath_list_area.column("column_end", anchor="w", width=100, minwidth=100)
+        self.breath_list_area.column("column_is_breath", anchor="center", width=70, minwidth=70)
+        self.breath_list_area.column("column_comment", anchor="e", width=500, minwidth=500)
+
+        #self.breath_list_area.heading("#0", text="Test", anchor="w")
+        self.breath_list_area.heading("column_number", text="Nr", anchor="w")
+        self.breath_list_area.heading("column_start", text="Start", anchor="w")
+        self.breath_list_area.heading("column_end", text="Ende", anchor="w")
+        self.breath_list_area.heading("column_is_breath", text="Atemzug?", anchor="w")
+        self.breath_list_area.heading("column_comment", text="Kommentar", anchor="w")
+
+        self.breath_list_area.grid(row=5, column=0, columnspan=10, padx=5, pady=5, sticky="w")
+
+        # beim Auswählen eines Atemzuges in der Liste wird eine Aktion ausgeführt
+        '''self.breath_list_area.bind("<<TreeviewSelect>>", self.on_tree_select)'''
+
+        # Funktion, welche beim Auswählen ines Datensatzes ausgeführt werden soll
+    '''def on_tree_select(self, event):
+        selected_item = self.breath_list_area.selection()[0]  # Erster ausgewählter Eintrag
+        item_values = self.breath_list_area.item(selected_item, "values")
+        print("Ausgewählter Datensatz:", item_values[1], item_values[2])'''
+
+    # Funktion zum Befüllen der list_area
+    def fill_list_area(self):
+        for i in self.breath.breath_list:
+            self.breath_list_area.insert("", "end", values=(i[0], i[1], i[2], "1", "-"))
+
+    # Funktion zum Leeren der list_area
+    def clear_list_area(self):
+        for item in self.breath_list_area.get_children():
+            self.breath_list_area.delete(item)
 
     # Funktion um den Startpunkt des Intervalls in einer Variable abzuspeichern
     # Zusätzlich werden die Buttons backwards_button & forwards_button freigegeben
@@ -147,18 +188,21 @@ class AtemzugValidierungGUI(tk.Tk):
                 self.save_interval_button.config(state="normal")
                 self.full_graph_button.config(state="normal")
 
+                self.clear_list_area()
+                self.fill_list_area()
+
                 ##############################################################################
                 '''# gibt alle Atemzüge + durchschnittlichen Druck und Grenzwert aus
                 print(f"Anzahl der Atemzüge: {len(self.breath.breath_list)}")
     
-                x = self.breath.get_most_frequent_pressure()
-                y = self.breath.get_pressure_limit()
+                #x = self.breath.get_most_frequent_pressure()
+                #y = self.breath.get_pressure_limit()
                 for i in self.breath.breath_list:
                     print(i)
-                print("Durchschnittlicher Druck")
-                print(x)
-                print("Grenzwert")
-                print(y)'''
+                #print("Durchschnittlicher Druck")
+                #print(x)
+                #print("Grenzwert")
+                #print(y)'''
                 ##############################################################################
 
                 input_window.destroy()

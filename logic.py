@@ -165,16 +165,8 @@ class AtemzugValidierungLogic:
 
             ###################################################################
             # TEST ATEMZUG MARKIERUNG
-            # Atemzug Nr. 120 und 121. NACHFRAGEN
-            '''ax.axvline(15901.76, color='cyan')
-            ax.axvline(15901.84, color='orange')
-
-            ax.axvline(15901.96, color='cyan')
-            ax.axvline(15902.07, color='orange')
-
-            ax.axvline(15902.12, color='cyan')
-            ax.axvline(15902.27, color='orange')'''
-
+            '''ax.axvline(20014.37, color='cyan')
+            ax.axvline(20015.65, color='orange')'''
             ##########################################################################################
 
             # Setzt die Grenzen der x-Achse entsprechend den Zeitintervallen

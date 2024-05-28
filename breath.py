@@ -77,7 +77,8 @@ class AtemzugValidierungBreaths:
 
         # Meist vorkommender Druckwert wird ermittelt
         most_frequent_pressure = counted_pressure_values.most_common(1)[0][0]
-        print("Häufigster Druck: " + str(most_frequent_pressure))
+        # Testprint
+        '''print("Häufigster Druck: " + str(most_frequent_pressure))'''
 
         return most_frequent_pressure
 
