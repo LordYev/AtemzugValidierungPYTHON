@@ -41,11 +41,6 @@ class AtemzugValidierungBreaths:
 
     # Funktion zur Ermittlung vom Anfang und Ende der Beatmung
     def get_ventilation_start_end(self):
-        if self.mask_edf_data is None:
-            print("breath Data is None")
-        else:
-            print("breath Data is NOT None")
-
         ventilation_start = None
         ventilation_end = None
 

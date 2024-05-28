@@ -228,11 +228,6 @@ class AtemzugValidierungGUI(tk.Tk):
                 self.breath.mask_edf_meta_data = self.logic.mask_edf_meta_data
                 self.breath.mask_edf_data = self.logic.mask_edf_data
 
-                if self.logic.mask_edf_data is None:
-                    print("logic Data is None")
-                else:
-                    print("logic Data is NOT None")
-
                 self.show_input_window()
 
                 # Sperrt beide buttons

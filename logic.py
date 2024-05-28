@@ -130,8 +130,7 @@ class AtemzugValidierungLogic:
             # Start- und Endindex für Mask- und Device-Kurve berechnen (Zeitpunkt * Abtastrate)
             mask_start_index = int(starting_point * mask_edf_meta_data['sfreq'])
             mask_end_index = int(end_point * mask_edf_meta_data['sfreq'])
-            '''device_start_index = int(starting_point * device_edf_meta_data['sfreq'])
-            device_end_index = int(end_point * device_edf_meta_data['sfreq'])'''
+
             device_start_index = int((starting_point - self.time_difference_start[0]) * device_edf_meta_data['sfreq'])
             device_end_index = int((end_point - self.time_difference_end[0]) * device_edf_meta_data['sfreq'])
 
@@ -139,9 +138,6 @@ class AtemzugValidierungLogic:
             scaled_device_data = self.scale_factor * device_edf_data[0, device_start_index:device_end_index]
 
             # Zeitintervall für Mask und Device erzeugen
-            '''mask_interval = np.arange(starting_point, end_point, 1 / mask_edf_meta_data['sfreq'])
-            device_interval = np.arange(starting_point + self.time_difference_start[0],
-                                        end_point + self.time_difference_end[0], 1 / mask_edf_meta_data['sfreq'])'''
             mask_interval = np.arange(starting_point, end_point, 1 / mask_edf_meta_data['sfreq'])
             device_interval = np.arange(starting_point, end_point, 1 / mask_edf_meta_data['sfreq'])
 
@@ -170,14 +166,14 @@ class AtemzugValidierungLogic:
             ###################################################################
             # TEST ATEMZUG MARKIERUNG
             # Atemzug Nr. 120 und 121. NACHFRAGEN
-            ax.axvline(15901.76, color='cyan')
+            '''ax.axvline(15901.76, color='cyan')
             ax.axvline(15901.84, color='orange')
 
             ax.axvline(15901.96, color='cyan')
             ax.axvline(15902.07, color='orange')
 
             ax.axvline(15902.12, color='cyan')
-            ax.axvline(15902.27, color='orange')
+            ax.axvline(15902.27, color='orange')'''
 
             ##########################################################################################
 
