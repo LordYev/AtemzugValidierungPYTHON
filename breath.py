@@ -28,14 +28,13 @@ class AtemzugValidierungBreaths:
                 if not breathing:
                     breathing = True
                     breath_start = i / 100
-            else:
-                if breathing:
-                    breath_end = i / 100
-                    # Aufzeichnung von atemzügen, welche mindesten 0,2 Sek lang sind
-                    if breath_end - breath_start >= 0.2:
-                        breaths.append((breath_no, breath_start, breath_end))
-                        breath_no += 1
-                    breathing = False
+            elif breathing:
+                breath_end = i / 100
+                # Aufzeichnung von atemzügen, welche mindesten 0,2 Sek lang sind
+                if breath_end - breath_start >= 0.2:
+                    breaths.append((breath_no, breath_start, breath_end))
+                    breath_no += 1
+                breathing = False
 
         return breaths
 
