@@ -123,7 +123,11 @@ class AtemzugValidierungGUI(tk.Tk):
     # Funktion zum Befüllen der list_area
     def fill_list_area(self):
         for i in self.breath.breath_list:
-            self.breath_list_area.insert("", "end", values=(i[0], i[1], i[2], "1", "-"))
+            # Die Start- und Endwerte werden auf zwei Nachkommastellen formatiert
+            value2 = f"{i[1]:.2f}"
+            value3 = f"{i[2]:.2f}"
+
+            self.breath_list_area.insert("", "end", values=(i[0], value2, value3, "1", "-"))
 
     # Funktion zum Leeren der list_area
     def clear_list_area(self):
