@@ -65,51 +65,64 @@ class AtemzugValidierungLogic:
 
         return fig, ax
 
+    # Funktion zum Ermitteln der Synchronisierungspunkte
+    def get_sync_points(self):
+        start_sync_point = None
+        end_sync_point = None
+
+        start_index = int(0 * self.mask_edf_meta_data['sfreq'])
+
+        # For-Schleife läuft vom start_index solange durch, bis es den Anfang des 1ten Synchronisierungspunktes ermittelt hat
+        for i in range(start_index, len(self.mask_edf_data[0]) - 1):
+            if self.mask_edf_data[0, i] > 2:
+                start_sync_point = i / 10000
+                break
+
+        start_index = int((self.duration_mask - 1) * self.mask_edf_meta_data['sfreq'])
+
+        # For-Schleife läuft rückwärts vom start_index solange durch, bis es das Ende des 2ten Synchronisierungspunktes ermittelt hat
+        for i in reversed(range(start_index)):
+            if self.mask_edf_data[0, i] > 2:
+                end_sync_point = i / 10000
+                break
+
+        # Startpunkt wird um 5sec und Endpunkt um 30sec nach links verschoben
+        start_sync_point = int((start_sync_point - 0.05) * self.mask_edf_meta_data['sfreq'])
+        end_sync_point = int((end_sync_point - 0.3) * self.mask_edf_meta_data['sfreq'])
+
+        return start_sync_point, end_sync_point
+
     # Funktion zum Synchronisieren der beiden Kurven aus den EDF-Dateien
     def sync_edf_data(self):
-        # Bestimme Start- und Endpunkt der ersten 2000sek
-        start_index = int(0 * self.mask_edf_meta_data['sfreq'])
-        end_index = int(2000 * self.mask_edf_meta_data['sfreq'])
+        # Beide Synchronisierungspunkte werden definiert
+        start_sync_point, end_sync_point = self.get_sync_points()
+        sync_point = start_sync_point
+        time_difference_start = None
+        time_difference_end = None
+        results = [time_difference_start, time_difference_end]
 
-        # Begrenze beide Kurven auf 2000sek
-        mask_1k_s_timeframe = self.mask_edf_data[:, start_index:end_index]
-        device_1k_s_timeframe = self.device_edf_data[:, start_index:end_index]
+        for i in range(len(results)):
+            # Bestimme Start- und Endpunkt des 1ten Synchronisierungspunktes
+            start_index = int(sync_point * self.mask_edf_meta_data['sfreq'])
+            end_index = int((sync_point + 60) * self.mask_edf_meta_data['sfreq'])
 
-        # Finde die Indexe der Maximalwerte im festgelegten Zeitrahmen
-        mask_max_index = np.argmax(mask_1k_s_timeframe, axis=1)
-        device_max_index = np.argmax(device_1k_s_timeframe, axis=1)
+            # Begrenze beide Kurven auf das Intervall zwischen start_index und end_index
+            mask_timeframe = self.mask_edf_data[:, start_index:end_index]
+            device_timeframe = self.device_edf_data[:, start_index:end_index]
 
-        # Finde die Zeitpunkte der maximalen Werte
-        mask_sync_point_times = (start_index + mask_max_index) / self.mask_edf_meta_data['sfreq']
-        device_sync_point_times = (start_index + device_max_index) / self.device_edf_meta_data['sfreq']
+            # Finde die Indexe der Maximalwerte im festgelegten Zeitrahmen
+            mask_max_index = np.argmax(mask_timeframe, axis=1)
+            device_max_index = np.argmax(device_timeframe, axis=1)
 
-        # Errechnet die Zeitdifferenz zwischen den beiden Maximalwerten der Kurven
-        time_difference_start = mask_sync_point_times - device_sync_point_times
+            # Finde die Zeitpunkte der maximalen Werte
+            mask_sync_point_times = (start_index + mask_max_index) / self.mask_edf_meta_data['sfreq']
+            device_sync_point_times = (start_index + device_max_index) / self.device_edf_meta_data['sfreq']
 
-        # Finde die Maximalwerte im festgelegten Zeitrahmen (NUR ZUM ANZEIGEN DER Y-WERTE)
-        '''mask_sync_points = np.max(mask_1k_s_timeframe, axis=1)
-        device_sync_points = np.max(device_1k_s_timeframe, axis=1)'''
+            # Errechnet die Zeitdifferenz zwischen den beiden Maximalwerten der Kurven
+            results[i] = mask_sync_point_times - device_sync_point_times
+            sync_point = end_sync_point
 
-        # ------------Ab hier gleicher Prozess für die letzten 2000sek------------
-
-        # Bestimme Start- und Endpunkt der letzten 2000sek
-        start_index_end = int((self.duration_mask - 2000) * self.mask_edf_meta_data['sfreq'])
-        end_index_end = int(self.duration_mask * self.mask_edf_meta_data['sfreq'])
-
-        # Begrenze beide Kurven auf 2000sek
-        mask_1k_s_timeframe_end = self.mask_edf_data[:, start_index_end:end_index_end]
-        device_1k_s_timeframe_end = self.device_edf_data[:, start_index_end:end_index_end]
-
-        # Finde die Indexe der Maximalwerte im festgelegten Zeitrahmen
-        mask_max_index_end = np.argmax(mask_1k_s_timeframe_end, axis=1)
-        device_max_index_end = np.argmax(device_1k_s_timeframe_end, axis=1)
-
-        # Finde die Zeitpunkte der maximalen Werte
-        mask_sync_point_times_end = (start_index_end + mask_max_index_end) / self.mask_edf_meta_data['sfreq']
-        device_sync_point_times_end = (start_index_end + device_max_index_end) / self.device_edf_meta_data['sfreq']
-
-        # Errechnet die Zeitdifferenz zwischen den beiden Maximalwerten der Kurven
-        time_difference_end = mask_sync_point_times_end - device_sync_point_times_end
+        time_difference_start, time_difference_end = results
 
         """# Ausgaben in der Konsole zur Kontrolle
         print(f"ENDZEIT: {end_index}")
