@@ -27,6 +27,8 @@ class AtemzugValidierungLogic:
         self.time_difference_start = None
         self.time_difference_end = None
         self.pressure_limit = None
+        self.breath_search_start_point = None
+        self.breath_search_end_point = None
 
     # Funktion zur Übergabe der Eingabe des Benutzers an die Variable starting_point
     def set_starting_point(self, starting_point_entry, starting_point, backward, forward):
@@ -85,6 +87,10 @@ class AtemzugValidierungLogic:
             if self.mask_edf_data[0, i] > 2:
                 end_sync_point = i / 10000
                 break
+
+        # Festlegen der Punkte zwischen welchen die Atemzüge ermittelt werden sollen
+        self.breath_search_start_point = int((start_sync_point + 0.6) * self.mask_edf_meta_data['sfreq'])
+        self.breath_search_end_point = int((end_sync_point - 0.6) * self.mask_edf_meta_data['sfreq'])
 
         # Startpunkt wird um 5sec und Endpunkt um 30sec nach links verschoben
         start_sync_point = int((start_sync_point - 0.05) * self.mask_edf_meta_data['sfreq'])
@@ -255,10 +261,6 @@ class AtemzugValidierungLogic:
         ax.plot(mask_time, self.mask_edf_data[0, :min_length], label='Mask', color='blue')
         ax.plot(device_time, scaled_device_data, label='Device', color='red')
         ax.legend(loc='upper center', ncol=3)
-
-        '''self.pressure_limit = self.get_pressure_limit()
-        ax.axhline(self.pressure_limit, label='Grenzwert', color='green', linestyle='dashed')
-        '''
 
         # Tkinter-Canvas-Objekt wird erstellt und Figur wird gezeichnet
         canvas = FigureCanvasTkAgg(fig)

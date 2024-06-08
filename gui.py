@@ -157,82 +157,23 @@ class AtemzugValidierungGUI(tk.Tk):
         canvas = self.logic.canvas.get_tk_widget()
         canvas.grid(row=2, column=0, columnspan=10, padx=5, pady=5, sticky='w')
 
-    def show_input_window(self):
-        # Neues Fenster
-        input_window = tk.Toplevel(master=self)
-        input_window.geometry("300x150")
-        input_window.resizable(False, False)
-        top_frame = tk.Frame(input_window)
-        top_frame.pack(side="top")
-        bottom_frame = tk.Frame(input_window)
-        bottom_frame.pack(side="bottom")
-        first_bottom_frame = tk.Frame(bottom_frame)
-        first_bottom_frame.pack(side="top")
-        second_bottom_frame = tk.Frame(bottom_frame)
-        second_bottom_frame.pack(side="bottom")
+    def determine_breaths(self):
+        # Übergabe der Zeitpunkte zwischen welchen die Atemzüge ermittelt werden
+        self.breath.start_analyses_index = self.logic.breath_search_start_point
+        self.breath.end_analyses_index = self.logic.breath_search_end_point
 
-        # Funktion zum Abschließen des Vorgangs im Fenster
-        def close_window():
-            try:
-                # Eingabewerte werden übergeben
-                self.breath.start_analyses_index = start_analyses_index_entry.get()
-                self.breath.end_analyses_index = end_analyses_index_entry.get()
+        # Atemzüge werden ermittelt und in Liste gespeichert
+        self.breath.breath_list = self.breath.get_breaths()
+        # Übergibt Grenzwert aus breath an logic
+        self.logic.pressure_limit = self.breath.pressure_limit
 
-                # Atemzüge werden ermittelt und in Liste gespeichert
-                self.breath.breath_list = self.breath.get_breaths()
-                # Übergibt Grenzwert aus breath an logic
-                self.logic.pressure_limit = self.breath.pressure_limit
+        # Entsperrt Buttons
+        self.interval_button.config(state="normal")
+        self.save_interval_button.config(state="normal")
+        self.full_graph_button.config(state="normal")
 
-                # Entsperrt Buttons
-                self.interval_button.config(state="normal")
-                self.save_interval_button.config(state="normal")
-                self.full_graph_button.config(state="normal")
-
-                self.clear_list_area()
-                self.fill_list_area()
-
-                ##############################################################################
-                '''# gibt alle Atemzüge + durchschnittlichen Druck und Grenzwert aus
-                print(f"Anzahl der Atemzüge: {len(self.breath.breath_list)}")
-    
-                #x = self.breath.get_most_frequent_pressure()
-                #y = self.breath.get_pressure_limit()
-                for i in self.breath.breath_list:
-                    print(i)
-                #print("Durchschnittlicher Druck")
-                #print(x)
-                #print("Grenzwert")
-                #print(y)'''
-                ##############################################################################
-
-                input_window.destroy()
-
-            except Exception as error_code:
-                print(f"\033[93mFehler bei Eingabe von Zeiten: {error_code}\033[0m")
-
-        label = tk.Label(top_frame, text="Bitte geben Sie zwei Zeitpunkte an. \n\n Startzeitpunkt muss VOR der Beatmung liegen! \n"
-                                         "Endzeitpunk muss NACH der Beatmung liegen!")
-        label.pack(padx=5, pady=5)
-
-        start_label = tk.Label(first_bottom_frame, text="Start:")
-        start_label.pack(side='left', padx=5, pady=5)
-
-        start_analyses_index_entry = tk.Entry(first_bottom_frame, width=8)
-        start_analyses_index_entry.pack(side='left', padx=5, pady=5)
-
-        end_label = tk.Label(first_bottom_frame, text="Ende:")
-        end_label.pack(side='left', padx=5, pady=5)
-
-        end_analyses_index_entry = tk.Entry(first_bottom_frame, width=8)
-        end_analyses_index_entry.pack(side='left', padx=5, pady=5)
-
-        confirm_button = tk.Button(second_bottom_frame, text="Bestätigen", command=close_window)
-        confirm_button.pack(side='left', padx=5, pady=5)
-
-        input_window.lift(self)
-        # input_window.grab_set()
-        # das soll eigentlich den Fokus auf das Fenster direkt richten
-        input_window.after(100, lambda: input_window.lift(self))
+        self.clear_list_area()
+        self.fill_list_area()
 
     # Funktion zum Auswählen eines Dateipfades/einer MAT-Datei und Anzeigen des MAT-Grafen
     def load_mat_file(self, mat_file_path_text):
@@ -272,7 +213,7 @@ class AtemzugValidierungGUI(tk.Tk):
                 self.breath.mask_edf_meta_data = self.logic.mask_edf_meta_data
                 self.breath.mask_edf_data = self.logic.mask_edf_data
 
-                self.show_input_window()
+                self.determine_breaths()
 
                 # Sperrt beide buttons
                 # hier werden die Buttons erneut gesperrt, da diese Funktion zum wiederholten Plotten verwendet wird
