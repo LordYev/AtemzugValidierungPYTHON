@@ -93,23 +93,32 @@ class AtemzugValidierungGUI(tk.Tk):
 
     # Funktion zur erstellung des Bereiches, in dem die Liste der Atemzüge angezeigt werden soll
     def gui_list_area(self):
-        self.breath_list_area = ttk.Treeview(self, columns=("column_number", "column_start", "column_end", "column_is_breath", "column_comment"), height=15)
+        # Erstellt ein Frame für die Liste und Scrollbar
+        frame = ttk.Frame(self)
+        frame.grid(row=5, column=0, columnspan=5, padx=5, pady=5, sticky="nsew")
 
-        self.breath_list_area.column("#0", width=0, stretch=tk.NO)    # Phantomspalte. Ist immer da, wird aber nicht benötigt
+        self.breath_list_area = ttk.Treeview(frame, columns=("column_number", "column_start", "column_end", "column_is_breath", "column_comment"),
+                                             height=15)
+
+        self.breath_list_area.column("#0", width=0, stretch=tk.NO)  # Phantomspalte. Ist immer da, wird aber nicht benötigt
         self.breath_list_area.column("column_number", anchor="e", width=40, minwidth=40)
         self.breath_list_area.column("column_start", anchor="e", width=100, minwidth=100)
         self.breath_list_area.column("column_end", anchor="e", width=100, minwidth=100)
         self.breath_list_area.column("column_is_breath", anchor="e", width=70, minwidth=70)
         self.breath_list_area.column("column_comment", anchor="w", width=600, minwidth=600)
 
-        #self.breath_list_area.heading("#0", text="Test", anchor="w")
+        # self.breath_list_area.heading("#0", text="Test", anchor="w")
         self.breath_list_area.heading("column_number", text="Nr", anchor="w")
         self.breath_list_area.heading("column_start", text="Start", anchor="w")
         self.breath_list_area.heading("column_end", text="Ende", anchor="w")
         self.breath_list_area.heading("column_is_breath", text="Atemzug?", anchor="w")
         self.breath_list_area.heading("column_comment", text="Kommentar", anchor="w")
 
-        self.breath_list_area.grid(row=5, column=0, columnspan=10, padx=5, pady=5, sticky="w")
+        scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=self.breath_list_area.yview)
+        self.breath_list_area.configure(yscrollcommand=scrollbar.set)
+
+        self.breath_list_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # beim Auswählen eines Atemzuges in der Liste wird eine Aktion ausgeführt
         '''self.breath_list_area.bind("<<TreeviewSelect>>", self.on_tree_select)'''
@@ -123,7 +132,7 @@ class AtemzugValidierungGUI(tk.Tk):
     # Funktion zum Befüllen der list_area
     def fill_list_area(self):
         for i in self.breath.breath_list:
-            # Die Start- und Endwerte werden auf zwei Nachkommastellen formatiert
+            # Die Zeitpunkte werden auf zwei Nachkommastellen formatiert
             value2 = f"{i[1]:.2f}"
             value3 = f"{i[2]:.2f}"
 
