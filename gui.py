@@ -150,12 +150,14 @@ class AtemzugValidierungGUI(tk.Tk):
         self.forwards_button.config(state="normal")
         self.starting_point = self.starting_point_entry.get()
         self.logic.use_multiple_funcs(self.starting_point_entry, self.starting_point, self.forward, self.backward)
+        self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
 
     # Funktion um im Plot rückwärts zu navigieren
     def go_backwards(self):
         self.backward = True
         self.logic.use_multiple_funcs(self.starting_point_entry, self.starting_point, self.backward, self.forward)
         self.starting_point = self.logic.starting_point
+        self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
         self.backward = False
 
     # Funktion um im Plot vorwärts zu navigieren
@@ -163,6 +165,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.forward = True
         self.logic.use_multiple_funcs(self.starting_point_entry, self.starting_point, self.backward, self.forward)
         self.starting_point = self.logic.starting_point
+        self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
         self.forward = False
 
     # Funktion um einen festen Graphen wieder zugeben
@@ -187,6 +190,26 @@ class AtemzugValidierungGUI(tk.Tk):
 
         self.clear_list_area()
         self.fill_list_area()
+
+    def determine_breaths_in_interval(self, interval_start, interval_duration):
+        self.clear_list_area()
+        interval_end = int(interval_start) + int(interval_duration)
+
+        # Ermittlung des ersten Atemzuges im Intervall
+        first_breath_start = None
+        for i in self.breath.breath_list:
+            if i[1] >= int(interval_start):
+                first_breath_start = i[0] - 1
+                break
+
+        # Füllt die Liste mit den im Plot angezeigten Atemzügen
+        for i in self.breath.breath_list[first_breath_start:]:
+            if interval_end >= i[2]:
+                value2 = f"{i[1]:.2f}"
+                value3 = f"{i[2]:.2f}"
+                self.breath_list_area.insert("", "end", values=(i[0], value2, value3, "1", "-"))
+            else:
+                break
 
     # Funktion zum Auswählen eines Dateipfades/einer MAT-Datei und Anzeigen des MAT-Grafen
     def load_mat_file(self, mat_file_path_text):
@@ -240,6 +263,10 @@ class AtemzugValidierungGUI(tk.Tk):
         try:
             self.logic.read_edf_file(mask_edf_file_path, device_edf_file_path)
             self.update_canvas()
+
+            # Leert und befüllt die Liste wieder mit allen Atemzügen
+            self.clear_list_area()
+            self.fill_list_area()
 
             # Sperrt beide buttons
             self.backwards_button.config(state="disabled")
