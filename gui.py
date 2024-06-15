@@ -17,6 +17,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.title("Atemzug Validierung")  # legt Titel für Hauptfenster fest
         self.geometry("1250x1000")  # legt Fenster größe fest
         self.starting_point_entry = None
+        self.interval_entry = None
         self.starting_point = None
         self.forward = False
         self.backward = False
@@ -50,7 +51,7 @@ class AtemzugValidierungGUI(tk.Tk):
         starting_point_label.grid(row=3, column=0, padx=5, pady=5, sticky="w")
 
         # Eingabefeld zur Eingabe des gewünschten Startpunktes
-        self.starting_point_entry = tk.Entry(self, width=8)
+        self.starting_point_entry = tk.Entry(self, width=8, state="readonly")
         self.starting_point_entry.grid(row=3, column=1, padx=5, pady=5, sticky="w")
 
         # Label für interval_entry
@@ -66,13 +67,19 @@ class AtemzugValidierungGUI(tk.Tk):
         sixty_sec_interval_button.grid(row=3, column=4, padx=5, pady=5)
 
         # Eingabefeld zur Eingabe des gewünschten Intervalls
-        interval_entry = tk.Entry(self, width=8)
-        interval_entry.grid(row=3, column=5, padx=5, pady=5, sticky="w")
+        self.interval_entry = tk.Entry(self, width=8, state="readonly")
+        self.interval_entry.grid(row=3, column=5, padx=5, pady=5, sticky="w")
 
         # Button zum Speichern des Intervalls
         self.save_interval_button = tk.Button(self, text="Intervall speichern",
-                                              command=lambda: self.logic.set_interval(float(interval_entry.get())), state="disabled")
+                                              command=lambda: self.logic.set_interval(float(self.interval_entry.get())), state="disabled")
         self.save_interval_button.grid(row=3, column=6, padx=5, pady=5)
+
+        # Ersetzt das Klicken auf den save_interval_button durch einen Klick auf die Enter Taste. Button ist weiterhin aktiv.
+        def trigger_save_interval_button(event):
+            self.logic.set_interval(float(self.interval_entry.get()))
+            self.focus()
+        self.interval_entry.bind("<Return>", trigger_save_interval_button)
 
         # Button um die ganze Grafik wieder anzuzeigen
         self.full_graph_button = tk.Button(self, text="Gesamten Graphen anzeigen",
@@ -83,6 +90,12 @@ class AtemzugValidierungGUI(tk.Tk):
         self.interval_button = tk.Button(self, text="Intervall anzeigen", command=lambda: self.set_starting_point(), state="disabled")
         self.interval_button.grid(row=4, column=1, padx=5, pady=5, sticky="w")
 
+        # Ersetzt das Klicken auf den interval_button durch einen Klick auf die Enter Taste. Button ist weiterhin aktiv.
+        def trigger_interval_button(event):
+            self.set_starting_point()
+            self.focus()
+        self.starting_point_entry.bind("<Return>", trigger_interval_button)
+
         # Button zum rückwärts Navigieren im Plot
         self.backwards_button = tk.Button(self, text="<", command=lambda: self.go_backwards(), state="disabled")
         self.backwards_button.grid(row=4, column=2, padx=5, pady=5, sticky="w")
@@ -90,6 +103,25 @@ class AtemzugValidierungGUI(tk.Tk):
         # Button zum vorwärts Navigieren im Plot
         self.forwards_button = tk.Button(self, text=">", command=lambda: self.go_forwards(), state="disabled")
         self.forwards_button.grid(row=4, column=2, padx=50, pady=5, sticky="w")
+
+        # Folgenden beiden Funktionen (1 & 2) ersetzen das Klicken auf die Buttons backwards_button & forwards_button durch das Nutzen der Pfeiltasten
+        # Funktion 1
+        def trigger_backwards_button(event):
+            try:
+                self.go_backwards()
+
+            except Exception as error_code:
+                print(f"\033[93mFehler beim rückwärts Navigieren: {error_code}\033[0m")
+        self.bind("<Left>", trigger_backwards_button)
+
+        # Funktion 2
+        def trigger_forwards_button(event):
+            try:
+                self.go_forwards()
+
+            except Exception as error_code:
+                print(f"\033[93mFehler beim vorwärts Navigieren: {error_code}\033[0m")
+        self.bind("<Right>", trigger_forwards_button)
 
     # Funktion zur erstellung des Bereiches, in dem die Liste der Atemzüge angezeigt werden soll
     def gui_list_area(self):
@@ -187,6 +219,8 @@ class AtemzugValidierungGUI(tk.Tk):
         self.interval_button.config(state="normal")
         self.save_interval_button.config(state="normal")
         self.full_graph_button.config(state="normal")
+        self.starting_point_entry.config(state="normal")
+        self.interval_entry.config(state="normal")
 
         self.clear_list_area()
         self.fill_list_area()
