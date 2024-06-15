@@ -15,7 +15,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.mask_edf_path = None
         self.device_edf_path = None  # Instanzvariable um den Pfad der EDF-Datei speichern
         self.title("Atemzug Validierung")  # legt Titel für Hauptfenster fest
-        self.geometry("950x1000")  # legt Fenster größe fest (Breite x Länge)
+        self.geometry("950x1000")  # legt Fenster größe fest (Breite x Höhe)
         self.starting_point = None
         self.forward = False
         self.backward = False

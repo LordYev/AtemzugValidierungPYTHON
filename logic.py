@@ -55,7 +55,7 @@ class AtemzugValidierungLogic:
 
     # Funktion zum Erstellen einer Matplotlib-Figur
     def create_figure(self):
-        # erstellt eine Matplotlib-Figur mit einer Zeile & Spalte (Breite 10 & Höhe 6 Einheiten)
+        # erstellt eine Matplotlib-Figur mit einer Zeile & Spalte (Breite x Höhe)
         fig, ax = plt.subplots(1, 1, figsize=(9, 4))
         ax.set_ylim(self.y_min, self.y_max)
         ax.set_ylabel('Druck in mbar')
