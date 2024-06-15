@@ -15,24 +15,29 @@ class AtemzugValidierungGUI(tk.Tk):
         self.mask_edf_path = None
         self.device_edf_path = None  # Instanzvariable um den Pfad der EDF-Datei speichern
         self.title("Atemzug Validierung")  # legt Titel für Hauptfenster fest
-        self.geometry("1250x1000")  # legt Fenster größe fest
-        self.starting_point_entry = None
-        self.interval_entry = None
+        self.geometry("950x1000")  # legt Fenster größe fest (Breite x Länge)
         self.starting_point = None
         self.forward = False
         self.backward = False
+        self.breath_list_area = None
+        # Ab heir Buttons und Eingabe in Reihenfolge der Implementierung
+        self.starting_point_entry = None
+        self.interval_button = None
         self.backwards_button = None
         self.forwards_button = None
-        self.interval_button = None
-        self.save_interval_button = None
         self.full_graph_button = None
-        self.breath_list_area = None
+        self.interval_entry = None
+        self.save_interval_button = None
+        self.thirty_sec_interval_button = None
+        self.sixty_sec_interval_button = None
+
 
         # Folgend werden GUI Elemente gebaut
         '''self.load_mat_file_button = tk.Button(self, text="MAT Datei auswählen", command=lambda: self.load_mat_file(self.mat_file_path_text))
         self.load_mat_file_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")'''
 
-        self.load_edf_file_button = tk.Button(self, text="EDF Ordner auswählen", command=lambda: self.load_edf_files(self.folder_path_text))
+        self.load_edf_file_button = tk.Button(self, text="EDF Ordner auswählen", command=lambda: self.load_edf_files(self.folder_path_text),
+                                              height=2, width=12, wraplength=120)
         self.load_edf_file_button.grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
         '''self.mat_file_path_text = tk.Text(self, height=1, width=100, wrap=tk.NONE)
@@ -47,48 +52,17 @@ class AtemzugValidierungGUI(tk.Tk):
     # Funktion zur erstellung der GUI Elemente für den EDF-Graphen
     def gui_edf_plot_area(self):
         # Label für starting_point_entry
-        starting_point_label = tk.Label(self, text="Startpunkt des Intervalls:")
+        starting_point_label = tk.Label(self, text="Startpunkt des Intervalls:", width=16)
         starting_point_label.grid(row=3, column=0, padx=5, pady=5, sticky="w")
 
         # Eingabefeld zur Eingabe des gewünschten Startpunktes
-        self.starting_point_entry = tk.Entry(self, width=8, state="readonly")
+        self.starting_point_entry = tk.Entry(self, width=8) # state="readonly"
         self.starting_point_entry.grid(row=3, column=1, padx=5, pady=5, sticky="w")
 
-        # Label für interval_entry
-        interval_label = tk.Label(self, text="Gewünschtes Intervall (Standard sind 30sek festgelegt):")
-        interval_label.grid(row=3, column=2, padx=5, pady=5, sticky="w")
-
-        # Button zum Festlegen eines 30sek Intervalls
-        thirty_sec_interval_button = tk.Button(self, text="30sek", command=lambda: self.logic.set_interval(30))
-        thirty_sec_interval_button.grid(row=3, column=3, padx=5, pady=5)
-
-        # Button zum Festlegen eines 60sek Intervalls
-        sixty_sec_interval_button = tk.Button(self, text="60sek", command=lambda: self.logic.set_interval(60))
-        sixty_sec_interval_button.grid(row=3, column=4, padx=5, pady=5)
-
-        # Eingabefeld zur Eingabe des gewünschten Intervalls
-        self.interval_entry = tk.Entry(self, width=8, state="readonly")
-        self.interval_entry.grid(row=3, column=5, padx=5, pady=5, sticky="w")
-
-        # Button zum Speichern des Intervalls
-        self.save_interval_button = tk.Button(self, text="Intervall speichern",
-                                              command=lambda: self.logic.set_interval(float(self.interval_entry.get())), state="disabled")
-        self.save_interval_button.grid(row=3, column=6, padx=5, pady=5)
-
-        # Ersetzt das Klicken auf den save_interval_button durch einen Klick auf die Enter Taste. Button ist weiterhin aktiv.
-        def trigger_save_interval_button(event):
-            self.logic.set_interval(float(self.interval_entry.get()))
-            self.focus()
-        self.interval_entry.bind("<Return>", trigger_save_interval_button)
-
-        # Button um die ganze Grafik wieder anzuzeigen
-        self.full_graph_button = tk.Button(self, text="Gesamten Graphen anzeigen",
-                                           command=lambda: self.plot_back_edf_file(self.mask_edf_path, self.device_edf_path), state="disabled")
-        self.full_graph_button.grid(row=4, column=0, padx=5, pady=5, sticky="w")
-
         # Button zum Anzeigen eines Intervalls in der Messung
-        self.interval_button = tk.Button(self, text="Intervall anzeigen", command=lambda: self.set_starting_point(), state="disabled")
-        self.interval_button.grid(row=4, column=1, padx=5, pady=5, sticky="w")
+        self.interval_button = tk.Button(self, text="Intervall anzeigen", command=lambda: self.set_starting_point(), state="disabled", height=2,
+                                         width=12, wraplength=120)
+        self.interval_button.grid(row=3, column=2, padx=5, pady=5, sticky="w")
 
         # Ersetzt das Klicken auf den interval_button durch einen Klick auf die Enter Taste. Button ist weiterhin aktiv.
         def trigger_interval_button(event):
@@ -97,19 +71,18 @@ class AtemzugValidierungGUI(tk.Tk):
         self.starting_point_entry.bind("<Return>", trigger_interval_button)
 
         # Button zum rückwärts Navigieren im Plot
-        self.backwards_button = tk.Button(self, text="<", command=lambda: self.go_backwards(), state="disabled")
-        self.backwards_button.grid(row=4, column=2, padx=5, pady=5, sticky="w")
+        self.backwards_button = tk.Button(self, text="<", command=lambda: self.go_backwards(), state="disabled", height=2, width=4)
+        self.backwards_button.grid(row=3, column=3, padx=5, pady=5, sticky="w")
 
         # Button zum vorwärts Navigieren im Plot
-        self.forwards_button = tk.Button(self, text=">", command=lambda: self.go_forwards(), state="disabled")
-        self.forwards_button.grid(row=4, column=2, padx=50, pady=5, sticky="w")
+        self.forwards_button = tk.Button(self, text=">", command=lambda: self.go_forwards(), state="disabled", height=2, width=4)
+        self.forwards_button.grid(row=3, column=3, padx=75, pady=5, sticky="w")
 
         # Folgenden beiden Funktionen (1 & 2) ersetzen das Klicken auf die Buttons backwards_button & forwards_button durch das Nutzen der Pfeiltasten
         # Funktion 1
         def trigger_backwards_button(event):
             try:
                 self.go_backwards()
-
             except Exception as error_code:
                 print(f"\033[93mFehler beim rückwärts Navigieren: {error_code}\033[0m")
         self.bind("<Left>", trigger_backwards_button)
@@ -118,16 +91,51 @@ class AtemzugValidierungGUI(tk.Tk):
         def trigger_forwards_button(event):
             try:
                 self.go_forwards()
-
             except Exception as error_code:
                 print(f"\033[93mFehler beim vorwärts Navigieren: {error_code}\033[0m")
         self.bind("<Right>", trigger_forwards_button)
+
+        # Button um die ganze Grafik wieder anzuzeigen
+        self.full_graph_button = tk.Button(self, text="Gesamten Graphen anzeigen",
+                                           command=lambda: self.plot_back_edf_file(self.mask_edf_path, self.device_edf_path), state="disabled",
+                                           height=2, width=12, wraplength=120)
+        self.full_graph_button.grid(row=3, column=4, padx=5, pady=5, sticky="w")
+
+        # Label für interval_entry
+        interval_label = tk.Label(self, text="Gewünschtes Intervall (Standardmäßig sind 30sek festgelegt):", width=16, wraplength=160)
+        interval_label.grid(row=4, column=0, padx=5, pady=5, sticky="w")
+
+        # Eingabefeld zur Eingabe des gewünschten Intervalls
+        self.interval_entry = tk.Entry(self, width=8)  # state="readonly"
+        self.interval_entry.grid(row=4, column=1, padx=5, pady=5, sticky="w")
+
+        # Button zum Speichern des Intervalls
+        self.save_interval_button = tk.Button(self, text="Intervall speichern",
+                                              command=lambda: self.logic.set_interval(float(self.interval_entry.get())), state="disabled",
+                                              height=2, width=12, wraplength=120)
+        self.save_interval_button.grid(row=4, column=2, padx=5, pady=5, sticky="w")
+
+        # Ersetzt das Klicken auf den save_interval_button durch einen Klick auf die Enter Taste. Button ist weiterhin aktiv.
+        def trigger_save_interval_button(event):
+            self.logic.set_interval(float(self.interval_entry.get()))
+            self.focus()
+        self.interval_entry.bind("<Return>", trigger_save_interval_button)
+
+        # Button zum Festlegen eines 30sek Intervalls
+        self.thirty_sec_interval_button = tk.Button(self, text="30sek", command=lambda: self.logic.set_interval(30),state="disabled",
+                                               height=2, width=4)
+        self.thirty_sec_interval_button.grid(row=4, column=3, padx=5, pady=5, sticky="w")
+
+        # Button zum Festlegen eines 60sek Intervalls
+        self.sixty_sec_interval_button = tk.Button(self, text="60sek", command=lambda: self.logic.set_interval(60), state="disabled",
+                                              height=2, width=4)
+        self.sixty_sec_interval_button.grid(row=4, column=3, padx=75, pady=5, sticky="w")
 
     # Funktion zur erstellung des Bereiches, in dem die Liste der Atemzüge angezeigt werden soll
     def gui_list_area(self):
         # Erstellt ein Frame für die Liste und Scrollbar
         frame = ttk.Frame(self)
-        frame.grid(row=5, column=0, columnspan=5, padx=5, pady=5, sticky="nsew")
+        frame.grid(row=6, column=0, columnspan=5, padx=5, pady=5, sticky="nsew")
 
         self.breath_list_area = ttk.Treeview(frame, columns=("column_number", "column_start", "column_end", "column_is_breath", "column_comment"),
                                              height=15)
@@ -221,6 +229,8 @@ class AtemzugValidierungGUI(tk.Tk):
         self.full_graph_button.config(state="normal")
         self.starting_point_entry.config(state="normal")
         self.interval_entry.config(state="normal")
+        self.thirty_sec_interval_button.config(state="normal")
+        self.sixty_sec_interval_button.config(state="normal")
 
         self.clear_list_area()
         self.fill_list_area()
