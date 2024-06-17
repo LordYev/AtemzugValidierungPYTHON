@@ -56,7 +56,7 @@ class AtemzugValidierungGUI(tk.Tk):
         starting_point_label.grid(row=3, column=0, padx=5, pady=5, sticky="w")
 
         # Eingabefeld zur Eingabe des gewünschten Startpunktes
-        self.starting_point_entry = tk.Entry(self, width=8) # state="readonly"
+        self.starting_point_entry = tk.Entry(self, width=8, state="readonly")
         self.starting_point_entry.grid(row=3, column=1, padx=5, pady=5, sticky="w")
 
         # Funktion startet set_starting_point und leert das Eingabefeld
@@ -114,7 +114,7 @@ class AtemzugValidierungGUI(tk.Tk):
         interval_label.grid(row=4, column=0, padx=5, pady=5, sticky="w")
 
         # Eingabefeld zur Eingabe des gewünschten Intervalls
-        self.interval_entry = tk.Entry(self, width=8)  # state="readonly"
+        self.interval_entry = tk.Entry(self, width=8, state="readonly")
         self.interval_entry.grid(row=4, column=1, padx=5, pady=5, sticky="w")
 
         # Button zum Speichern des Intervalls
@@ -202,6 +202,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
     # Funktion um im Plot rückwärts zu navigieren
     def go_backwards(self):
+        self.focus()
         self.backward = True
         self.logic.use_multiple_funcs(self.starting_point_entry, self.starting_point, self.backward, self.forward)
         self.starting_point = self.logic.starting_point
@@ -210,6 +211,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
     # Funktion um im Plot vorwärts zu navigieren
     def go_forwards(self):
+        self.focus()
         self.forward = True
         self.logic.use_multiple_funcs(self.starting_point_entry, self.starting_point, self.backward, self.forward)
         self.starting_point = self.logic.starting_point
