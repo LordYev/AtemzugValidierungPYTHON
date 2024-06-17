@@ -62,7 +62,8 @@ class AtemzugValidierungGUI(tk.Tk):
         # Funktion startet set_starting_point und leert das Eingabefeld
         def set_starting_point_and_clear():
             self.set_starting_point()
-            self.starting_point_entry.delete(0, tk.END)
+            # Leert das Eingabefeld (NACHFARGEN OB GEBRAUCHT WIRD) - auch in Zeile 77
+            '''self.starting_point_entry.delete(0, tk.END)'''
 
         # Button zum Anzeigen eines Intervalls in der Messung
         self.interval_button = tk.Button(self, text="Intervall anzeigen", command=lambda: set_starting_point_and_clear(), state="disabled", height=2,
@@ -73,7 +74,8 @@ class AtemzugValidierungGUI(tk.Tk):
         def trigger_interval_button(event):
             self.set_starting_point()
             self.focus()
-            self.starting_point_entry.delete(0, tk.END)
+            # Leert das Eingabefeld (NACHFARGEN OB GEBRAUCHT WIRD) - auch in Zeile 65
+            '''self.starting_point_entry.delete(0, tk.END)'''
         self.starting_point_entry.bind("<Return>", trigger_interval_button)
 
         # Button zum rückwärts Navigieren im Plot
