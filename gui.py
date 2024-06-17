@@ -129,13 +129,17 @@ class AtemzugValidierungGUI(tk.Tk):
             self.focus()
         self.interval_entry.bind("<Return>", trigger_save_interval_button)
 
+        def trigger_empty_set_interval(value):
+            self.logic.set_interval(value)
+            self.interval_entry.delete(0, tk.END)
+
         # Button zum Festlegen eines 30sek Intervalls
-        self.thirty_sec_interval_button = tk.Button(self, text="30sek", command=lambda: self.logic.set_interval(30),state="disabled",
+        self.thirty_sec_interval_button = tk.Button(self, text="30sek", command=lambda: trigger_empty_set_interval(30),state="disabled",
                                                height=2, width=4)
         self.thirty_sec_interval_button.grid(row=4, column=3, padx=5, pady=5, sticky="w")
 
         # Button zum Festlegen eines 60sek Intervalls
-        self.sixty_sec_interval_button = tk.Button(self, text="60sek", command=lambda: self.logic.set_interval(60), state="disabled",
+        self.sixty_sec_interval_button = tk.Button(self, text="60sek", command=lambda: trigger_empty_set_interval(60), state="disabled",
                                               height=2, width=4)
         self.sixty_sec_interval_button.grid(row=4, column=3, padx=75, pady=5, sticky="w")
 
