@@ -163,8 +163,8 @@ class AtemzugValidierungGUI(tk.Tk):
 
         # self.breath_list_area.heading("#0", text="Test", anchor="w")
         self.breath_list_area.heading("column_number", text="Nr", anchor="w")
-        self.breath_list_area.heading("column_start", text="Start", anchor="w")
-        self.breath_list_area.heading("column_end", text="Ende", anchor="w")
+        self.breath_list_area.heading("column_start", text="Start (sek)", anchor="w")
+        self.breath_list_area.heading("column_end", text="Ende (sek)", anchor="w")
         self.breath_list_area.heading("column_is_breath", text="Atemzug?", anchor="w")
         self.breath_list_area.heading("column_comment", text="Kommentar", anchor="w")
 
