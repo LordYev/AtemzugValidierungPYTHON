@@ -20,6 +20,8 @@ class AtemzugValidierungGUI(tk.Tk):
         self.forward = False
         self.backward = False
         self.breath_list_area = None
+        self.breath_start = None
+        self.breath_end = None
         # Ab heir Buttons und Eingabe in Reihenfolge der Implementierung
         self.starting_point_entry = None
         self.interval_button = None
@@ -173,13 +175,23 @@ class AtemzugValidierungGUI(tk.Tk):
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # beim Auswählen eines Atemzuges in der Liste wird eine Aktion ausgeführt
-        '''self.breath_list_area.bind("<<TreeviewSelect>>", self.on_tree_select)'''
+        self.breath_list_area.bind("<<TreeviewSelect>>", self.on_breath_selection)
 
-        # Funktion, welche beim Auswählen ines Datensatzes ausgeführt werden soll
-    '''def on_tree_select(self, event):
-        selected_item = self.breath_list_area.selection()[0]  # Erster ausgewählter Eintrag
-        item_values = self.breath_list_area.item(selected_item, "values")
-        print("Ausgewählter Datensatz:", item_values[1], item_values[2])'''
+        # Funktion, welche beim Auswählen eines Datensatzes ausgeführt werden soll
+    def on_breath_selection(self, event):
+        try:
+            selected_item = self.breath_list_area.selection()[0]  # Erster ausgewählter Eintrag
+            item_values = self.breath_list_area.item(selected_item, "values")
+            #print("Ausgewählter Datensatz:", item_values[1], item_values[2])
+
+            self.breath_start = item_values[1]
+            self.breath_end = item_values[2]
+            self.logic.use_multiple_funcs(self.starting_point, self.starting_point, self.forward, self.backward, self.breath_start, self.breath_end)
+            self.breath_start = None
+            self.breath_end = None
+
+        except Exception as error_code:
+            print(f"\033[93mFehler bei Auswahl eines Datensatzes: {error_code}\033[0m")
 
     # Funktion zum Befüllen der list_area
     def fill_list_area(self):
@@ -201,14 +213,16 @@ class AtemzugValidierungGUI(tk.Tk):
         self.backwards_button.config(state="normal")
         self.forwards_button.config(state="normal")
         self.starting_point = self.starting_point_entry.get()
-        self.logic.use_multiple_funcs(self.starting_point_entry, self.starting_point, self.forward, self.backward)
+        self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.forward, self.backward,
+                                      self.breath_start, self.breath_end)
         self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
 
     # Funktion um im Plot rückwärts zu navigieren
     def go_backwards(self):
         self.focus()
         self.backward = True
-        self.logic.use_multiple_funcs(self.starting_point_entry, self.starting_point, self.backward, self.forward)
+        self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.backward, self.forward,
+                                      self.breath_start, self.breath_end)
         self.starting_point = self.logic.starting_point
         self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
         self.backward = False
@@ -217,7 +231,8 @@ class AtemzugValidierungGUI(tk.Tk):
     def go_forwards(self):
         self.focus()
         self.forward = True
-        self.logic.use_multiple_funcs(self.starting_point_entry, self.starting_point, self.backward, self.forward)
+        self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.backward, self.forward,
+                                      self.breath_start, self.breath_end)
         self.starting_point = self.logic.starting_point
         self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
         self.forward = False
@@ -314,8 +329,12 @@ class AtemzugValidierungGUI(tk.Tk):
                 self.backwards_button.config(state="disabled")
                 self.forwards_button.config(state="disabled")
 
+                # Leert die Eingabefelder
+                self.starting_point_entry.delete(0, tk.END)
+                self.interval_entry.delete(0, tk.END)
+
         except Exception as error_code:
-            print(f"Fehler beim laden der EDF-Dateien: {error_code}")
+            print(f"\033[93mFehler beim laden der EDF-Dateien: {error_code}\033[0m")
 
     def plot_back_edf_file(self, mask_edf_file_path, device_edf_file_path):
         try:
@@ -329,6 +348,13 @@ class AtemzugValidierungGUI(tk.Tk):
             # Sperrt beide buttons
             self.backwards_button.config(state="disabled")
             self.forwards_button.config(state="disabled")
+
+            # Leert die Eingabefelder
+            self.starting_point_entry.delete(0, tk.END)
+            self.interval_entry.delete(0, tk.END)
+
+            # Setzt den Startpunkt des Intervalls auf None
+            self.starting_point = None
 
         except Exception as error_code:
             print(f"\033[93mFehler beim Darstellen des EDF-Graphen: {error_code}\033[0m")

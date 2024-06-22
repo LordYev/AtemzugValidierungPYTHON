@@ -41,17 +41,17 @@ class AtemzugValidierungLogic:
         elif forward is True:
             self.starting_point = start_point + self.interval
         else:
-            self.starting_point = float(starting_point_entry.get())
+            self.starting_point = float(starting_point_entry)
 
     # Funktion zum Setzen eines Intervalls (Zeitspanne der Beatmung)
     def set_interval(self, value):
         self.interval = value
 
     # Funktion zum Aufrufen mehrerer Funktionen zeitgleich
-    def use_multiple_funcs(self, starting_point_entry, starting_point, backward, forward):
+    def use_multiple_funcs(self, starting_point_entry, starting_point, backward, forward, breath_start, breath_end):
         self.set_starting_point(starting_point_entry, starting_point, backward, forward)
         self.plot_edf_interval(self.mask_edf_meta_data, self.mask_edf_data, self.device_edf_meta_data, self.device_edf_data, self.starting_point,
-                               self.interval)
+                               self.interval, breath_start, breath_end)
 
     # Funktion zum Erstellen einer Matplotlib-Figur
     def create_figure(self):
@@ -141,7 +141,8 @@ class AtemzugValidierungLogic:
         return time_difference_start, time_difference_end
 
     # Funktion zum erneuten Plotten der Daten in einem 30-Sekunden Intervall
-    def plot_edf_interval(self, mask_edf_meta_data, mask_edf_data, device_edf_meta_data, device_edf_data, starting_point, interval):
+    def plot_edf_interval(self, mask_edf_meta_data, mask_edf_data, device_edf_meta_data, device_edf_data, starting_point, interval,
+                          breath_start, breath_end):
         try:
             # Berechnet den Endzeitpunkt des Intervalls
             end_point = starting_point + interval
@@ -178,15 +179,12 @@ class AtemzugValidierungLogic:
             # Plottet die neuen Linien für das Intervall
             ax.plot(mask_interval, mask_edf_data[0, mask_start_index:mask_end_index][:min_length], label="Mask", color="blue")
             ax.plot(device_interval, scaled_device_data, label="Device", color="red")
-
             ax.axhline(self.pressure_limit, label="Grenzwert", color="green", linestyle="dashed")
-            ax.legend(loc="upper center", ncol=3)
 
-            ###################################################################
-            # TEST ATEMZUG MARKIERUNG
-            '''ax.axvline(20014.37, color='cyan')
-            ax.axvline(20015.65, color='orange')'''
-            ##########################################################################################
+            # Wenn die übergebenen Variablen Zeitpunkte haben, dann soll dort jeweils eine Senkrechte Linie geplottet werden
+            if breath_start and breath_end is not None:
+                ax.axvline(float(breath_start), label="Inhale", color='cyan')
+                ax.axvline(float(breath_end), label="Exhale", color='orange')
 
             # Setzt die Grenzen der x-Achse entsprechend den Zeitintervallen
             ax.set_xlim(mask_interval[0], device_interval[-1])
@@ -194,6 +192,7 @@ class AtemzugValidierungLogic:
             # Aktualisierung des Labels zum Anzeigen der aktuellen Intervalldauer
             ax.set_xlabel(f"Zeit in Sekunden (aktuelle Intervalldauer: {int(self.interval)}sek)")
 
+            ax.legend(loc="upper center", ncol=3)
             # Aktualisiert das Plot Fenster
             plt.draw()
 
