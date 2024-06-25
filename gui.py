@@ -193,6 +193,30 @@ class AtemzugValidierungGUI(tk.Tk):
         except Exception as error_code:
             print(f"\033[93mFehler bei Auswahl eines Datensatzes: {error_code}\033[0m")
 
+    def on_breath_double_click(self, event):
+        selected_item = self.breath_list_area.selection()[0]
+        column = self.breath_list_area.identify_column(event.x)
+        if column == "#5":
+            x, y, width, height = self.breath_list_area.bbox(selected_item, column)
+            value = self.breath_list_area.item(selected_item, "values")[4]
+
+            self.entry = tk.Entry(self.breath_list_area)
+            self.entry.place(x=x, y=y, width=width, height=height)
+            self.entry.insert(0, value)
+            self.entry.focus()
+
+            def on_entry_confirm(event):
+                # Speichern des neuen Werts
+                new_comment_value = self.entry.get()
+                values = list(self.breath_list_area.item(selected_item, "values"))
+                values[4] = new_comment_value
+                self.breath_list_area.item(selected_item, values=values)
+                self.entry.destroy()
+
+            # Ereignis binden, wenn die Eingabe bestätigt wird
+            self.entry.bind("<Return>", on_entry_confirm)
+            self.entry.bind("<FocusOut>", lambda event: self.entry.destroy())
+
     # Funktion zum Befüllen der list_area
     def fill_list_area(self):
         for i in self.breath.breath_list:
@@ -201,6 +225,10 @@ class AtemzugValidierungGUI(tk.Tk):
             value3 = f"{i[2]:.2f}"
 
             self.breath_list_area.insert("", "end", values=(i[0], value2, value3, "1", "-"))
+
+        # ermöglicht einen Doppelklick in der Liste
+        # führt beim Doppelklick die Funktion on_breath_double_click aus
+        self.breath_list_area.bind("<Double-1>", self.on_breath_double_click)
 
     # Funktion zum Leeren der list_area
     def clear_list_area(self):
