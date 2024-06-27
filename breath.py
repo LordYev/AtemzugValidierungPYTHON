@@ -24,6 +24,8 @@ class AtemzugValidierungBreaths:
         start_index, end_index = self.get_ventilation_start_end()
         # Grenzwert wird berechnet
         self.pressure_limit = self.get_pressure_limit()
+        print(start_index / 100)
+        print((end_index / 100) - 300)
 
         for i in range(start_index, end_index):
             if self.mask_edf_data[0, i] >= self.pressure_limit and self.mask_edf_data[0, i + 1] > self.pressure_limit:
@@ -34,8 +36,20 @@ class AtemzugValidierungBreaths:
                 breath_end = i / 100
                 # Aufzeichnung von atemzügen, welche mindesten 0,2 Sek lang sind
                 if breath_end - breath_start >= 0.2:
+                    # setzt Status und Kommentar für alle Atemzüge in den ersten 5 Minuten fest
+                    if breath_start < ((start_index / 100) + 300):
+                        value_status = 0
+                        value_comment = "Atemzug befindet sich innerhalb der ersten 5 Minuten!"
+
+                    # setzt Status und Kommentar für alle Atemzüge in den letzten 5 Minuten fest
+                    if breath_start > ((end_index / 100) - 300):
+                        value_status = 0
+                        value_comment = "Atemzug befindet sich innerhalb der letzten 5 Minuten!"
+
                     breaths.append((breath_no, breath_start, breath_end, value_status, value_comment))
                     breath_no += 1
+                    value_status = 1
+                    value_comment = "-"
                 breathing = False
 
         return breaths
