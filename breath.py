@@ -17,6 +17,8 @@ class AtemzugValidierungBreaths:
         breathing = False
         breath_start = None
         breath_no = 1
+        value_status = 1
+        value_comment = "-"
 
         # Start- und Endpunkt. Ab wo bis wo werden Atemzüge erfasst
         start_index, end_index = self.get_ventilation_start_end()
@@ -32,7 +34,7 @@ class AtemzugValidierungBreaths:
                 breath_end = i / 100
                 # Aufzeichnung von atemzügen, welche mindesten 0,2 Sek lang sind
                 if breath_end - breath_start >= 0.2:
-                    breaths.append((breath_no, breath_start, breath_end))
+                    breaths.append((breath_no, breath_start, breath_end, value_status, value_comment))
                     breath_no += 1
                 breathing = False
 

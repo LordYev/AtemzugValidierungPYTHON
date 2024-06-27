@@ -165,7 +165,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath_list_area.heading("column_number", text="Nr", anchor="w")
         self.breath_list_area.heading("column_start", text="Start (sek)", anchor="w")
         self.breath_list_area.heading("column_end", text="Ende (sek)", anchor="w")
-        self.breath_list_area.heading("column_is_breath", text="Atemzug?", anchor="w")
+        self.breath_list_area.heading("column_is_breath", text="Status", anchor="w")
         self.breath_list_area.heading("column_comment", text="Kommentar", anchor="w")
 
         scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=self.breath_list_area.yview)
@@ -177,7 +177,7 @@ class AtemzugValidierungGUI(tk.Tk):
         # beim Auswählen eines Atemzuges in der Liste wird eine Aktion ausgeführt
         self.breath_list_area.bind("<<TreeviewSelect>>", self.on_breath_selection)
 
-        # Funktion, welche beim Auswählen eines Datensatzes ausgeführt werden soll
+    # Funktion, welche beim Auswählen eines Datensatzes ausgeführt werden soll
     def on_breath_selection(self, event):
         try:
             selected_item = self.breath_list_area.selection()[0]  # Erster ausgewählter Eintrag
@@ -193,24 +193,50 @@ class AtemzugValidierungGUI(tk.Tk):
         except Exception as error_code:
             print(f"\033[93mFehler bei Auswahl eines Datensatzes: {error_code}\033[0m")
 
+    # Funktion welche beim Doppelklick auf die Spalte "Kommentar" ausgeführt wird
     def on_breath_double_click(self, event):
         selected_item = self.breath_list_area.selection()[0]
-        column = self.breath_list_area.identify_column(event.x)
-        if column == "#5":
-            x, y, width, height = self.breath_list_area.bbox(selected_item, column)
-            value = self.breath_list_area.item(selected_item, "values")[4]
+        affected_column = self.breath_list_area.identify_column(event.x)
+        if affected_column == "#5":
+            # Koordinaten der ausgewählten Spalte werden ermittelt
+            x, y, width, height = self.breath_list_area.bbox(selected_item, affected_column)
+            comment_value = self.breath_list_area.item(selected_item, "values")[4]
+
+            breath_number = self.breath_list_area.item(selected_item, "values")[0]
+            selected_index = int(breath_number) - 1
 
             self.entry = tk.Entry(self.breath_list_area)
             self.entry.place(x=x, y=y, width=width, height=height)
-            self.entry.insert(0, value)
+            self.entry.insert(0, comment_value)
             self.entry.focus()
 
+            # Funktion speichert neuen wert im Feld und entfernt Fokus von Liste
             def on_entry_confirm(event):
-                # Speichern des neuen Werts
+                # neuen kommentar auslesen
                 new_comment_value = self.entry.get()
-                values = list(self.breath_list_area.item(selected_item, "values"))
-                values[4] = new_comment_value
-                self.breath_list_area.item(selected_item, values=values)
+
+                # Funktion speichert Textwert in Spalte "Kommentar" und passt entsprechen Status des Datensatzes an
+                def get_new_data(data, text_value):
+                    data[4] = text_value
+                    if data[4] != "-" and data[4] != "":
+                        data[3] = 2
+                    else:
+                        data[3] = 1
+
+                    return data
+
+                # zeigt neuen statt alten Kommentar nach Speicherung in Liste an
+                selected_data = list(self.breath_list_area.item(selected_item, "values"))
+                new_data = get_new_data(selected_data, new_comment_value)
+                self.breath_list_area.item(selected_item, values=new_data)
+
+                # ändert und speichert Kommentar in Atemzugliste (breath_list)
+                # ausgewähltes Tupel in breath_list wird zur Liste konvertiert
+                selected_tuple = list(self.breath.breath_list[selected_index])
+                new_tuple = get_new_data(selected_tuple, new_comment_value)
+                # Datensatz wird zurück zum Tupel konvertiert und in breath_list gespeichert
+                self.breath.breath_list[selected_index] = tuple(new_tuple)
+
                 self.entry.destroy()
 
             # Ereignis binden, wenn die Eingabe bestätigt wird
@@ -221,10 +247,10 @@ class AtemzugValidierungGUI(tk.Tk):
     def fill_list_area(self):
         for i in self.breath.breath_list:
             # Die Zeitpunkte werden auf zwei Nachkommastellen formatiert
-            value2 = f"{i[1]:.2f}"
-            value3 = f"{i[2]:.2f}"
+            value_start = f"{i[1]:.2f}"
+            value_end = f"{i[2]:.2f}"
 
-            self.breath_list_area.insert("", "end", values=(i[0], value2, value3, "1", "-"))
+            self.breath_list_area.insert("", "end", values=(i[0], value_start, value_end, i[3], i[4]))
 
         # ermöglicht einen Doppelklick in der Liste
         # führt beim Doppelklick die Funktion on_breath_double_click aus
@@ -306,9 +332,10 @@ class AtemzugValidierungGUI(tk.Tk):
         # Füllt die Liste mit den im Plot angezeigten Atemzügen
         for i in self.breath.breath_list[first_breath_start:]:
             if interval_end >= i[2]:
-                value2 = f"{i[1]:.2f}"
-                value3 = f"{i[2]:.2f}"
-                self.breath_list_area.insert("", "end", values=(i[0], value2, value3, "1", "-"))
+                value_start = f"{i[1]:.2f}"
+                value_end = f"{i[2]:.2f}"
+
+                self.breath_list_area.insert("", "end", values=(i[0], value_start, value_end, i[3], i[4]))
             else:
                 break
 
