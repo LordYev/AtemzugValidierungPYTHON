@@ -22,7 +22,10 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath_list_area = None
         self.breath_start = None
         self.breath_end = None
-        # Ab heir Buttons und Eingabe in Reihenfolge der Implementierung
+        self.selected_breath = None
+        self.selected_breath_index = None
+        self.interval_is_showen = False
+        # Ab hier Buttons und Eingabe in Reihenfolge der Implementierung
         self.starting_point_entry = None
         self.interval_button = None
         self.backwards_button = None
@@ -32,6 +35,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.save_interval_button = None
         self.thirty_sec_interval_button = None
         self.sixty_sec_interval_button = None
+        self.invalid_breath_button = None
 
 
         # Folgend werden GUI Elemente gebaut
@@ -149,10 +153,14 @@ class AtemzugValidierungGUI(tk.Tk):
     def gui_list_area(self):
         # Erstellt ein Frame für die Liste und Scrollbar
         frame = ttk.Frame(self)
-        frame.grid(row=6, column=0, columnspan=5, padx=5, pady=5, sticky="nsew")
+        frame.grid(row=5, column=0, columnspan=5, padx=5, pady=5, sticky="nsew")
 
         self.breath_list_area = ttk.Treeview(frame, columns=("column_number", "column_start", "column_end", "column_is_breath", "column_comment"),
                                              height=15)
+
+        self.invalid_breath_button = tk.Button(text="kein Atemzug", command=lambda: self.set_data_to_invalid(), state="disabled",
+                                               height=2, width=12, wraplength=120)
+        self.invalid_breath_button.grid(row=6, column=0, padx=5, pady=5, sticky="w")
 
         self.breath_list_area.column("#0", width=0, stretch=tk.NO)  # Phantomspalte. Ist immer da, wird aber nicht benötigt
         self.breath_list_area.column("column_number", anchor="e", width=40, minwidth=40)
@@ -174,8 +182,11 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath_list_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # beim Auswählen eines Atemzuges in der Liste wird eine Aktion ausgeführt
+        # beim Auswählen eines Atemzuges in der Liste wird die Funktion on_breath_selection ausgeführt
         self.breath_list_area.bind("<<TreeviewSelect>>", self.on_breath_selection)
+        # ermöglicht einen Doppelklick in der Liste
+        # führt beim Doppelklick die Funktion on_breath_double_click aus
+        self.breath_list_area.bind("<Double-1>", self.on_breath_double_click)
 
     # Funktion, welche beim Auswählen eines Datensatzes ausgeführt werden soll
     def on_breath_selection(self, event):
@@ -186,9 +197,13 @@ class AtemzugValidierungGUI(tk.Tk):
 
             self.breath_start = item_values[1]
             self.breath_end = item_values[2]
-            self.logic.use_multiple_funcs(self.starting_point, self.starting_point, self.forward, self.backward, self.breath_start, self.breath_end)
+            if self.interval_is_showen is True:
+                self.logic.use_multiple_funcs(self.starting_point, self.starting_point, self.forward, self.backward, self.breath_start, self.breath_end)
             self.breath_start = None
             self.breath_end = None
+
+            breath_number = self.breath_list_area.item(selected_item, "values")[0]
+            self.selected_breath_index = int(breath_number) - 1
 
         except Exception as error_code:
             print(f"\033[93mFehler bei Auswahl eines Datensatzes: {error_code}\033[0m")
@@ -252,18 +267,28 @@ class AtemzugValidierungGUI(tk.Tk):
 
             self.breath_list_area.insert("", "end", values=(i[0], value_start, value_end, i[3], i[4]))
 
-        # ermöglicht einen Doppelklick in der Liste
-        # führt beim Doppelklick die Funktion on_breath_double_click aus
-        self.breath_list_area.bind("<Double-1>", self.on_breath_double_click)
-
     # Funktion zum Leeren der list_area
     def clear_list_area(self):
         for item in self.breath_list_area.get_children():
             self.breath_list_area.delete(item)
 
+    def set_data_to_invalid(self):
+        selected_item = self.breath_list_area.selection()[0]
+        actual_temp_data = list(self.breath_list_area.item(selected_item, "values"))
+        actual_temp_data[3] = 0
+        actual_temp_data[4] = "kein Atemzug!"
+        self.breath_list_area.item(selected_item, values=actual_temp_data)
+
+        actual_data = list(self.breath.breath_list[self.selected_breath_index])
+        actual_data[3] = 0
+        actual_data[4] = "kein Atemzug!"
+        new_data = tuple(actual_data)
+        self.breath.breath_list[self.selected_breath_index] = new_data
+
     # Funktion um den Startpunkt des Intervalls in einer Variable abzuspeichern
     # Zusätzlich werden die Buttons backwards_button & forwards_button freigegeben
     def set_starting_point(self):
+        self.interval_is_showen = True
         self.backwards_button.config(state="normal")
         self.forwards_button.config(state="normal")
         self.starting_point = self.starting_point_entry.get()
@@ -314,6 +339,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.interval_entry.config(state="normal")
         self.thirty_sec_interval_button.config(state="normal")
         self.sixty_sec_interval_button.config(state="normal")
+        self.invalid_breath_button.config(state="normal")
 
         self.clear_list_area()
         self.fill_list_area()
@@ -393,6 +419,8 @@ class AtemzugValidierungGUI(tk.Tk):
 
     def plot_back_edf_file(self, mask_edf_file_path, device_edf_file_path):
         try:
+            self.interval_is_showen = False
+
             self.logic.read_edf_file(mask_edf_file_path, device_edf_file_path)
             self.update_canvas()
 
