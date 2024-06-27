@@ -24,8 +24,6 @@ class AtemzugValidierungBreaths:
         start_index, end_index = self.get_ventilation_start_end()
         # Grenzwert wird berechnet
         self.pressure_limit = self.get_pressure_limit()
-        print(start_index / 100)
-        print((end_index / 100) - 300)
 
         for i in range(start_index, end_index):
             if self.mask_edf_data[0, i] >= self.pressure_limit and self.mask_edf_data[0, i + 1] > self.pressure_limit:
