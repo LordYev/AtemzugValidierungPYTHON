@@ -55,6 +55,11 @@ class AtemzugValidierungGUI(tk.Tk):
         self.gui_edf_plot_area()
         self.gui_list_area()
 
+    # Funktion zum Testen auf was der Fokus liegt
+    '''def check_focus(self):
+        focused_widget = self.focus_get()
+        print(f"Fokus liegt auf: {focused_widget}")'''
+
     # Funktion zur erstellung der GUI Elemente für den EDF-Graphen
     def gui_edf_plot_area(self):
         # Label für starting_point_entry
@@ -191,19 +196,28 @@ class AtemzugValidierungGUI(tk.Tk):
     # Funktion, welche beim Auswählen eines Datensatzes ausgeführt werden soll
     def on_breath_selection(self, event):
         try:
-            selected_item = self.breath_list_area.selection()[0]  # Erster ausgewählter Eintrag
-            item_values = self.breath_list_area.item(selected_item, "values")
-            #print("Ausgewählter Datensatz:", item_values[1], item_values[2])
+            # selected_data bekommt die Liste mit der ID des Datensatzes
+            selected_data = self.breath_list_area.selection()
 
-            self.breath_start = item_values[1]
-            self.breath_end = item_values[2]
-            if self.interval_is_showen is True:
-                self.logic.use_multiple_funcs(self.starting_point, self.starting_point, self.forward, self.backward, self.breath_start, self.breath_end)
-            self.breath_start = None
-            self.breath_end = None
+            # wenn selected_data nicht leer ist, dann
+            if selected_data:
+                # ID wird ausgelesen
+                selected_data_id = selected_data[0]  # Erster ausgewählter Eintrag
+                # Übergibt die Werte aus der Liste mit der ausgewählten ID
+                selected_data_values = self.breath_list_area.item(selected_data_id, "values")
 
-            breath_number = self.breath_list_area.item(selected_item, "values")[0]
-            self.selected_breath_index = int(breath_number) - 1
+                # Wenn sich der Benutzer in einem Intervall befindet, dann sollen Start und Ende des ausgewählten Atemzuges übergeben werden,
+                # damit dieser im Plot markiert werden kann
+                if self.interval_is_showen is True:
+                    self.breath_start = selected_data_values[1]
+                    self.breath_end = selected_data_values[2]
+                    self.logic.use_multiple_funcs(self.starting_point, self.starting_point, self.forward, self.backward, self.breath_start, self.breath_end)
+                    self.breath_start = None
+                    self.breath_end = None
+
+                # Ermittlung des Index des ausgewählten Datensatzes
+                breath_number = selected_data_values[0]
+                self.selected_breath_index = int(breath_number) - 1
 
         except Exception as error_code:
             print(f"\033[93mFehler bei Auswahl eines Datensatzes: {error_code}\033[0m")
