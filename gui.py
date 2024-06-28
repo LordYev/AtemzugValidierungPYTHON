@@ -246,11 +246,18 @@ class AtemzugValidierungGUI(tk.Tk):
 
                 # Funktion speichert Textwert in Spalte "Kommentar" und passt entsprechen Status des Datensatzes an
                 def get_new_data(data, text_value):
-                    data[4] = text_value
-                    if data[4] != "-" and data[4] != "":
+                    first_5_min_text = "Atemzug befindet sich innerhalb der ersten 5 Minuten!"
+                    last_5_min_text = "Atemzug befindet sich innerhalb der letzten 5 Minuten!"
+
+                    if text_value.startswith("kein Atemzug!") or text_value == first_5_min_text or text_value == last_5_min_text:
+                        data[3] = 0
+                        data[4] = text_value
+                    elif text_value != "-" and text_value != "":
                         data[3] = 2
+                        data[4] = text_value
                     else:
                         data[3] = 1
+                        data[4] = text_value
 
                     return data
 
