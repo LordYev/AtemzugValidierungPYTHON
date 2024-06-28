@@ -317,31 +317,27 @@ class AtemzugValidierungGUI(tk.Tk):
                                       self.breath_start, self.breath_end)
         self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
 
-    # Funktion um im Plot rückwärts zu navigieren
-    def go_backwards(self):
+    # Funktion zum vor- und rückwärts Navigieren
+    def backwards_forwards_navigation(self):
         focus = self.focus_get()
-
+        # Navigation soll nicht möglich sein, wenn Fokus noch auf Eingabefeld in Kommentarspalte liegt
         if str(focus).startswith(".!frame.!treeview.!entry") is not True:
-            self.focus()
-            self.backward = True
             self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.backward, self.forward,
                                           self.breath_start, self.breath_end)
             self.starting_point = self.logic.starting_point
             self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
-            self.backward = False
+
+    # Funktion um im Plot rückwärts zu navigieren
+    def go_backwards(self):
+        self.backward = True
+        self.backwards_forwards_navigation()
+        self.backward = False
 
     # Funktion um im Plot vorwärts zu navigieren
     def go_forwards(self):
-        focus = self.focus_get()
-
-        if str(focus).startswith(".!frame.!treeview.!entry") is not True:
-            self.focus()
-            self.forward = True
-            self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.backward, self.forward,
-                                          self.breath_start, self.breath_end)
-            self.starting_point = self.logic.starting_point
-            self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
-            self.forward = False
+        self.forward = True
+        self.backwards_forwards_navigation()
+        self.forward = False
 
     # Funktion um einen festen Graphen wieder zugeben
     def update_canvas(self):
