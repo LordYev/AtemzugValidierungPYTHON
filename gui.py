@@ -167,6 +167,9 @@ class AtemzugValidierungGUI(tk.Tk):
                                                height=2, width=12, wraplength=120)
         self.invalid_breath_button.grid(row=6, column=0, padx=5, pady=5, sticky="w")
 
+        self.export_button = tk.Button(self, text="Liste exportieren", state="disabled", height=2, width=12, wraplength=120)
+        self.export_button.grid(row=6, column=4, padx=5, pady=5, sticky="w")
+
         self.breath_list_area.column("#0", width=0, stretch=tk.NO)  # Phantomspalte. Ist immer da, wird aber nicht benötigt
         self.breath_list_area.column("column_number", anchor="e", width=40, minwidth=40)
         self.breath_list_area.column("column_start", anchor="e", width=100, minwidth=100)
@@ -363,6 +366,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.thirty_sec_interval_button.config(state="normal")
         self.sixty_sec_interval_button.config(state="normal")
         self.invalid_breath_button.config(state="normal")
+        self.export_button.config(state="normal")
 
         self.clear_list_area()
         self.fill_list_area()
