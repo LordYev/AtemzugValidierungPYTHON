@@ -4,6 +4,7 @@ from tkinter import filedialog  # filedialog = Modul aus tkinter um Dateien ausw
 from logic import AtemzugValidierungLogic
 from breath import AtemzugValidierungBreaths
 import os
+import csv
 
 
 class AtemzugValidierungGUI(tk.Tk):
@@ -25,6 +26,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.selected_breath = None
         self.selected_breath_index = None
         self.interval_is_showen = False
+        self.column_headers = None
         # Ab hier Buttons und Eingabe in Reihenfolge der Implementierung
         self.starting_point_entry = None
         self.interval_button = None
@@ -36,6 +38,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.thirty_sec_interval_button = None
         self.sixty_sec_interval_button = None
         self.invalid_breath_button = None
+        self.export_button = None
 
 
         # Folgend werden GUI Elemente gebaut
@@ -156,6 +159,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
     # Funktion zur erstellung des Bereiches, in dem die Liste der Atemzüge angezeigt werden soll
     def gui_list_area(self):
+        self.column_headers = ["Nr", "Start (sek)", "Ende (sek)", "Status", "Kommentar"]
         # Erstellt ein Frame für die Liste und Scrollbar
         frame = ttk.Frame(self)
         frame.grid(row=5, column=0, columnspan=5, padx=5, pady=5, sticky="nsew")
@@ -167,7 +171,7 @@ class AtemzugValidierungGUI(tk.Tk):
                                                height=2, width=12, wraplength=120)
         self.invalid_breath_button.grid(row=6, column=0, padx=5, pady=5, sticky="w")
 
-        self.export_button = tk.Button(self, text="Liste exportieren", state="disabled", height=2, width=12, wraplength=120)
+        self.export_button = tk.Button(self, text="Liste als .csv exportieren", command=lambda: self.export_list(), state="disabled", height=2, width=12, wraplength=120)
         self.export_button.grid(row=6, column=4, padx=5, pady=5, sticky="w")
 
         self.breath_list_area.column("#0", width=0, stretch=tk.NO)  # Phantomspalte. Ist immer da, wird aber nicht benötigt
@@ -178,11 +182,11 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath_list_area.column("column_comment", anchor="w", width=600, minwidth=600)
 
         # self.breath_list_area.heading("#0", text="Test", anchor="w")
-        self.breath_list_area.heading("column_number", text="Nr", anchor="w")
-        self.breath_list_area.heading("column_start", text="Start (sek)", anchor="w")
-        self.breath_list_area.heading("column_end", text="Ende (sek)", anchor="w")
-        self.breath_list_area.heading("column_is_breath", text="Status", anchor="w")
-        self.breath_list_area.heading("column_comment", text="Kommentar", anchor="w")
+        self.breath_list_area.heading("column_number", text=self.column_headers[0], anchor="w")
+        self.breath_list_area.heading("column_start", text=self.column_headers[1], anchor="w")
+        self.breath_list_area.heading("column_end", text=self.column_headers[2], anchor="w")
+        self.breath_list_area.heading("column_is_breath", text=self.column_headers[3], anchor="w")
+        self.breath_list_area.heading("column_comment", text=self.column_headers[4], anchor="w")
 
         scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=self.breath_list_area.yview)
         self.breath_list_area.configure(yscrollcommand=scrollbar.set)
@@ -195,6 +199,71 @@ class AtemzugValidierungGUI(tk.Tk):
         # ermöglicht einen Doppelklick in der Liste
         # führt beim Doppelklick die Funktion on_breath_double_click aus
         self.breath_list_area.bind("<Double-1>", self.on_breath_double_click)
+
+    # Funktion kopiert nur valide Daten in neue Liste
+    def get_valid_data(self):
+        breath_list_valid = []
+        for i in self.breath.breath_list:
+            if i[3] == 1 or i[3] == 2:
+                breath_list_valid.append(i)
+
+        return breath_list_valid
+
+    # Funktion kopiert nur invalide Daten in neue Liste
+    def get_invalid_data(self):
+        breath_list_invalid = []
+        for i in self.breath.breath_list:
+            if i[3] == 0:
+                breath_list_invalid.append(i)
+
+        return breath_list_invalid
+
+    # Funktion kopiert nur kommentierte Daten in neue Liste
+    def get_commented_data(self):
+        breath_list_commented = []
+        for i in self.breath.breath_list:
+            if i[3] == 2:
+                breath_list_commented.append(i)
+
+        return breath_list_commented
+
+    # Funktion erstellt CSV Datei
+    def export_to_csv(self, filename, data):
+        with open(filename, mode='w', newline='') as file:
+            writer = csv.writer(file, delimiter=";")
+            writer.writerow(self.column_headers)
+            for row in data:
+                writer.writerow(list(row))
+
+    # Funktion exportiert übergebene Listen in CSV Dateien
+    def export_list(self):
+        self.breath.breath_list_valid_data = self.get_valid_data()
+        self.breath.breath_list_invalid_data = self.get_invalid_data()
+        self.breath.breath_list_commented_data = self.get_commented_data()
+
+        # öffnet Dialogfenster, wo man den Speicherort auswählen kann
+        folder_path = filedialog.askdirectory(
+            title="Speicherort auswählen"
+        )
+
+        # wenn Speicherort ausgewählt wurde, werden alle Dateien dort abgelegt
+        if folder_path:
+            file_name = "full_data.csv"
+            full_path = os.path.join(folder_path, file_name)
+            self.export_to_csv(full_path, self.breath.breath_list)
+
+            file_name = "valid_data.csv"
+            full_path = os.path.join(folder_path, file_name)
+            self.export_to_csv(full_path, self.breath.breath_list_valid_data)
+
+            file_name = "invalid_data.csv"
+            full_path = os.path.join(folder_path, file_name)
+            self.export_to_csv(full_path, self.breath.breath_list_invalid_data)
+
+            file_name = "commented_data.csv"
+            full_path = os.path.join(folder_path, file_name)
+            self.export_to_csv(full_path, self.breath.breath_list_commented_data)
+
 
     # Funktion, welche beim Auswählen eines Datensatzes ausgeführt werden soll
     def on_breath_selection(self, event):

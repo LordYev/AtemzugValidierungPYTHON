@@ -4,6 +4,9 @@ from collections import Counter  # ermöglicht das Erstellen von Histogrammen
 class AtemzugValidierungBreaths:
     def __init__(self):
         self.breath_list = None
+        self.breath_list_valid_data = None
+        self.breath_list_invalid_data = None
+        self.breath_list_commented_data = None
         self.mask_edf_meta_data = None
         self.mask_edf_data = None
         self.pressure_limit = None
