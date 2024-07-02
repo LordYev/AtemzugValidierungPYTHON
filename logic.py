@@ -183,8 +183,8 @@ class AtemzugValidierungLogic:
 
             # Wenn die übergebenen Variablen Zeitpunkte haben, dann soll dort jeweils eine Senkrechte Linie geplottet werden
             if breath_start and breath_end is not None:
-                ax.axvline(float(breath_start), label="Inhale", color='cyan')
-                ax.axvline(float(breath_end), label="Exhale", color='orange')
+                ax.axvline(float(breath_start), color='cyan')
+                ax.axvline(float(breath_end), color='orange')
 
             # Setzt die Grenzen der x-Achse entsprechend den Zeitintervallen
             ax.set_xlim(mask_interval[0], device_interval[-1])
