@@ -1,4 +1,5 @@
 from collections import Counter  # ermöglicht das Erstellen von Histogrammen
+import numpy as np
 
 
 class AtemzugValidierungBreaths:
@@ -56,7 +57,8 @@ class AtemzugValidierungBreaths:
         return breaths
 
     # Funktion zur Ermittlung vom Anfang und Ende der Beatmung
-    def get_ventilation_start_end(self):
+    # V1
+    '''def get_ventilation_start_end(self):
         ventilation_start = None
         ventilation_end = None
 
@@ -78,6 +80,79 @@ class AtemzugValidierungBreaths:
 
         ventilation_start = int(ventilation_start * self.mask_edf_meta_data['sfreq'])
         ventilation_end = int(ventilation_end * self.mask_edf_meta_data['sfreq'])
+
+        return ventilation_start, ventilation_end'''
+
+    # V2
+    '''def get_ventilation_start_end(self):
+        window_size = 5
+        ventilation_start = None
+        ventilation_end = None
+
+        start_index = int(float(self.start_analyses_index) * self.mask_edf_meta_data['sfreq'])
+        end_index = int(float(self.end_analyses_index) * self.mask_edf_meta_data['sfreq'])
+
+        # Berechne den gleitenden Durchschnitt
+        moving_average = np.convolve(self.mask_edf_data[0], np.ones(window_size) / window_size, mode='valid')
+
+        # For-Schleife läuft vom start_index solange durch, bis es den Anfang der Beatmung ermittelt hat
+        for i in range(start_index, len(moving_average)):
+            if moving_average[i] > 1:
+                ventilation_start = i + window_size - 1
+                break
+
+        # For-Schleife läuft rückwärts vom end_index solange durch, bis es das Ende der Beatmung ermittelt hat
+        for i in reversed(range(end_index - window_size)):
+            if moving_average[i] > 1:
+                ventilation_end = i + window_size - 1
+                break
+
+        return ventilation_start, ventilation_end'''
+
+    # V3
+    def get_ventilation_start_end(self):
+        ventilation_start = None
+        ventilation_end = None
+
+        start_index = int(float(self.start_analyses_index) * self.mask_edf_meta_data['sfreq'])
+
+        # For-Schleife läuft vom start_index solange durch, bis es den Anfang der Beatmung ermittelt hat
+        for i in range(start_index, len(self.mask_edf_data[0]) - 1):
+            if self.mask_edf_data[0, i] > 1:
+                ventilation_start = i
+                # Test-Liste wird erstellt und mit Werten der nächsten 10sek befüllt
+                test_values = []
+                for index in range(ventilation_start, min(ventilation_start + 1000, len(self.mask_edf_data[0]))):
+                    test_values.append(self.mask_edf_data[0, index])
+                # Durchschnitt wird berechnet um zu schauen, ob es der Beginn der Beatmung, oder nur ein Ausschlag in der Kurve war
+                values_sum = sum(test_values)
+                values_count = len(test_values)
+                if values_count > 0:
+                    average = values_sum / values_count
+                    # wenn Durchschnitt größer als 1, dann setze Beatmungsstartpunkt fest
+                    if average >= 1:
+                        break
+                    else:
+                        ventilation_start = None
+
+        start_index = int(float(self.end_analyses_index) * self.mask_edf_meta_data['sfreq'])
+
+        # For-Schleife läuft rückwärts vom start_index solange durch, bis es das Ende der Beatmung ermittelt hat
+        # gleicher Algorithmus wie zuvor, nur rückwärts
+        for i in reversed(range(start_index)):
+            if self.mask_edf_data[0, i] > 1:
+                ventilation_end = i
+                test_values = []
+                for index in reversed(range(max(ventilation_end - 1000, 0), ventilation_end)):
+                    test_values.append(self.mask_edf_data[0, index])
+                values_sum = sum(test_values)
+                values_count = len(test_values)
+                if values_count > 0:
+                    average = values_sum / values_count
+                    if average >= 1:
+                        break
+                    else:
+                        ventilation_start = None
 
         return ventilation_start, ventilation_end
 
