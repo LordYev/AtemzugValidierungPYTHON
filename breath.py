@@ -161,7 +161,7 @@ class AtemzugValidierungBreaths:
         start_index, end_index = self.get_ventilation_start_end()
 
         # Druckwerte >= 1 werden in Liste pressure_values durch List Comprehension gespeichert
-        pressure_values = [i for i in self.mask_edf_data[0, start_index:end_index] if i >= 0]
+        pressure_values = [i for i in self.mask_edf_data[0, start_index:end_index] if i >= 1]
 
         # Histogramm wird erstellt. Häufigkeit der Druckwerte wird gezählt
         counted_pressure_values = Counter(pressure_values)
