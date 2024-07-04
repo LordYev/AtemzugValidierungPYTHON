@@ -54,7 +54,41 @@ class AtemzugValidierungBreaths:
                     value_comment = "-"
                 breathing = False
 
-        return breaths
+        breath_list = self.mark_anomalie_data(breaths)
+
+        return breath_list
+
+    # Funktion ermittelt Atemzüge mit einer Anomalie und markiert diese
+    def mark_anomalie_data(self, breath_list):
+        # breath_list wird in Liste umgewandelt um Einträge bearbeiten zu können
+        breath_list = [list(item) for item in breath_list]
+        breath_duration_list = []
+        index = 0
+        # Ermittelt die Dauer jedes Atemzuges
+        for i in breath_list:
+            breath_duration = i[2] - i[1]
+            breath_duration_list.append(breath_duration)
+
+        # ermittelt den Median aus der Liste der Atemzugdauern
+        breath_duration_median = statistics.median(breath_duration_list)
+        # ermittelt die Standardabweichung aus der Liste der Atemzugdauern
+        breath_duration_std_dev = statistics.stdev(breath_duration_list)
+        '''print("median", breath_duration_median)
+        print("std_dev", breath_duration_std_dev)
+        print("valider Bereich", breath_duration_median - 2 * breath_duration_std_dev, " bis ", breath_duration_median + 2 * breath_duration_std_dev)'''
+
+        # ermittelt Atemzüge mit einer Anomalie und markiert diese
+        for duration in breath_duration_list:
+            if duration < (breath_duration_median - 2 * breath_duration_std_dev) or duration > (breath_duration_median + 2 * breath_duration_std_dev):
+                if breath_list[index][4] == "-":
+                    breath_list[index][3] = 3
+                    breath_list[index][4] = f"ANOMALIE. Dauer: {duration:.2f}sek"
+            index += 1
+
+        # Liste wird wieder in die ursprüngliche Form (Tupel) umgewandelt
+        breath_list = [tuple(item) for item in breath_list]
+
+        return breath_list
 
     # Funktion zur Ermittlung vom Anfang und Ende der Beatmung
     # V1
@@ -165,6 +199,6 @@ class AtemzugValidierungBreaths:
         pressure_median = statistics.median(pressure_values)
 
         # ist diese Berechnung notwendig?
-        '''pressure_median_limit = pressure_median + (0.6 * pressure_median)'''
+        pressure_median_limit = pressure_median + (0.6 * pressure_median)
 
-        return pressure_median
+        return pressure_median_limit
