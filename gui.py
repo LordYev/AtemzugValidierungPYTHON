@@ -424,7 +424,7 @@ class AtemzugValidierungGUI(tk.Tk):
         # Atemzüge werden ermittelt und in Liste gespeichert
         self.breath.breath_list = self.breath.get_breaths()
         # Übergibt Grenzwert aus breath an logic
-        self.logic.pressure_limit = self.breath.pressure_limit
+        self.logic.pressure_median = self.breath.pressure_median
 
         # Entsperrt Buttons
         self.interval_button.config(state="normal")

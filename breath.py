@@ -1,6 +1,6 @@
 from collections import Counter  # ermöglicht das Erstellen von Histogrammen
 import numpy as np
-
+import statistics
 
 class AtemzugValidierungBreaths:
     def __init__(self):
@@ -10,7 +10,7 @@ class AtemzugValidierungBreaths:
         self.breath_list_commented_data = None
         self.mask_edf_meta_data = None
         self.mask_edf_data = None
-        self.pressure_limit = None
+        self.pressure_median = None
         # Start- und Endpunkt in denen das Programm die Atemzüge ermittelt
         self.start_analyses_index = 0.0
         self.end_analyses_index = 0.0
@@ -26,11 +26,11 @@ class AtemzugValidierungBreaths:
 
         # Start- und Endpunkt. Ab wo bis wo werden Atemzüge erfasst
         start_index, end_index = self.get_ventilation_start_end()
-        # Grenzwert wird berechnet
-        self.pressure_limit = self.get_pressure_limit()
+        # Schwellwert wird berechnet
+        self.pressure_median = self.get_pressure_median()
 
         for i in range(start_index, end_index):
-            if self.mask_edf_data[0, i] >= self.pressure_limit and self.mask_edf_data[0, i + 1] > self.pressure_limit:
+            if self.mask_edf_data[0, i] >= self.pressure_median and self.mask_edf_data[0, i + 1] > self.pressure_median:
                 if not breathing:
                     breathing = True
                     breath_start = i / 100
@@ -157,25 +157,14 @@ class AtemzugValidierungBreaths:
         return ventilation_start, ventilation_end
 
     # Funktion zum Ermitteln des am meist vorkommenden Drucks
-    def get_most_frequent_pressure(self):
+    def get_pressure_median(self):
         start_index, end_index = self.get_ventilation_start_end()
 
         # Druckwerte >= 1 werden in Liste pressure_values durch List Comprehension gespeichert
         pressure_values = [i for i in self.mask_edf_data[0, start_index:end_index] if i >= 1]
+        pressure_median = statistics.median(pressure_values)
 
-        # Histogramm wird erstellt. Häufigkeit der Druckwerte wird gezählt
-        counted_pressure_values = Counter(pressure_values)
+        # ist diese Berechnung notwendig?
+        '''pressure_median_limit = pressure_median + (0.6 * pressure_median)'''
 
-        # Meist vorkommender Druckwert wird ermittelt
-        most_frequent_pressure = counted_pressure_values.most_common(1)[0][0]
-        # Testprint
-        '''print("Häufigster Druck: " + str(most_frequent_pressure))'''
-
-        return most_frequent_pressure
-
-    # Funktion zum Festlegen des Grenzwertes, welcher überschritten werden muss, um Atemzüge zu ermitteln
-    def get_pressure_limit(self):
-        most_frequent_pressure = self.get_most_frequent_pressure()
-        pressure_limit = most_frequent_pressure + (0.6 * most_frequent_pressure)
-
-        return pressure_limit
+        return pressure_median
