@@ -94,11 +94,17 @@ class AtemzugValidierungGUI(tk.Tk):
 
         # Button zum rückwärts Navigieren im Plot
         self.backwards_button = tk.Button(self, text="<", command=lambda: self.go_backwards(), state="disabled", height=2, width=4)
-        self.backwards_button.grid(row=3, column=3, padx=5, pady=5, sticky="w")
+        self.backwards_button.grid(row=3, column=3, columnspan=10, padx=45, pady=5, sticky="w")
 
         # Button zum vorwärts Navigieren im Plot
         self.forwards_button = tk.Button(self, text=">", command=lambda: self.go_forwards(), state="disabled", height=2, width=4)
-        self.forwards_button.grid(row=3, column=3, padx=75, pady=5, sticky="w")
+        self.forwards_button.grid(row=3, column=3, columnspan=10, padx=115, pady=5, sticky="w")
+
+        self.fast_backwards_button = tk.Button(self, text="<<", state="disabled", height=2, width=1)
+        self.fast_backwards_button.grid(row=3, column=3, columnspan=10, padx=5, pady=5, sticky="w")
+
+        self.fast_forwards_button = tk.Button(self, text=">>", state="disabled", height=2, width=1)
+        self.fast_forwards_button.grid(row=3, column=3, columnspan=10, padx=180, pady=5, sticky="w")
 
         # Folgenden beiden Funktionen (1 & 2) ersetzen das Klicken auf die Buttons backwards_button & forwards_button durch das Nutzen der Pfeiltasten
         # Funktion 1
@@ -149,13 +155,13 @@ class AtemzugValidierungGUI(tk.Tk):
 
         # Button zum Festlegen eines 30sek Intervalls
         self.thirty_sec_interval_button = tk.Button(self, text="30sek", command=lambda: trigger_empty_set_interval(30),state="disabled",
-                                               height=2, width=4)
+                                               height=2, width=8)
         self.thirty_sec_interval_button.grid(row=4, column=3, padx=5, pady=5, sticky="w")
 
         # Button zum Festlegen eines 60sek Intervalls
         self.sixty_sec_interval_button = tk.Button(self, text="60sek", command=lambda: trigger_empty_set_interval(60), state="disabled",
-                                              height=2, width=4)
-        self.sixty_sec_interval_button.grid(row=4, column=3, padx=75, pady=5, sticky="w")
+                                              height=2, width=8)
+        self.sixty_sec_interval_button.grid(row=4, column=3, padx=115, pady=5, sticky="w")
 
     # Funktion zur erstellung des Bereiches, in dem die Liste der Atemzüge angezeigt werden soll
     def gui_list_area(self):
@@ -394,6 +400,8 @@ class AtemzugValidierungGUI(tk.Tk):
         self.interval_is_showen = True
         self.backwards_button.config(state="normal")
         self.forwards_button.config(state="normal")
+        self.fast_backwards_button.config(state="normal")
+        self.fast_forwards_button.config(state="normal")
         self.starting_point = self.starting_point_entry.get()
         self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.forward, self.backward,
                                       self.breath_start, self.breath_end)
