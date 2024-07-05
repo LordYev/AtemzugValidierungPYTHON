@@ -200,6 +200,14 @@ class AtemzugValidierungGUI(tk.Tk):
         # führt beim Doppelklick die Funktion on_breath_double_click aus
         self.breath_list_area.bind("<Double-1>", self.on_breath_double_click)
 
+    def list_info_text(self):
+        limit_info_label = tk.Label(self, text="Valider Druckbereich:\nValide Dauer:", justify="left")
+        limit_info_label.grid(row=6, column=1, columnspan=10, padx=5, pady=5, sticky="w")
+
+        values_label = tk.Label(self, text=f"min {self.breath.min_pressure:.2f}mbar - max {self.breath.max_pressure:.2f}mbar\n"
+                                           f"min {self.breath.min_duration:.2f}sek - max {self.breath.max_duration:.2f}sek", justify="left")
+        values_label.grid(row=6, column=1, columnspan=10, padx=150, pady=5, sticky="w")
+
     # Funktion kopiert nur valide Daten in neue Liste
     def get_valid_data(self):
         breath_list_valid = []
@@ -353,6 +361,8 @@ class AtemzugValidierungGUI(tk.Tk):
 
     # Funktion zum Befüllen der list_area
     def fill_list_area(self):
+        self.list_info_text()
+
         for i in self.breath.breath_list:
             # Die Zeitpunkte werden auf zwei Nachkommastellen formatiert
             value_start = f"{i[1]:.2f}"

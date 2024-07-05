@@ -11,6 +11,10 @@ class AtemzugValidierungBreaths:
         self.mask_edf_meta_data = None
         self.mask_edf_data = None
         self.pressure_median = None
+        self.min_pressure = None
+        self.max_pressure = None
+        self.min_duration = None
+        self.max_duration = None
         # Start- und Endpunkt in denen das Programm die Atemzüge ermittelt
         self.start_analyses_index = 0.0
         self.end_analyses_index = 0.0
@@ -58,33 +62,75 @@ class AtemzugValidierungBreaths:
 
         return breath_list
 
+    # Funktion zum Ermitteln des maximalen Drucks eines Atemzuges
+    def get_pressure_peak(self, start_index, end_index):
+        # Star und Ende werden umgerechnet, da es Kommazahlen mit zwei Nachkommastellen sind
+        start_index = int(start_index * 100)
+        end_index = int(end_index * 100)
+        pressure_list = []
+        # ermittelt jeden Druckwert zwischen Start und Ende, speichert diese in Liste pressure_list ab
+        for i in range(start_index, end_index):
+            pressure_list.append(self.mask_edf_data[0, i])
+
+        # höchster Druckwert wird ermittelt
+        pressure_max = np.max(pressure_list)
+
+        return pressure_max
+
     # Funktion ermittelt Atemzüge mit einer Anomalie und markiert diese
     def mark_anomalie_data(self, breath_list):
         # breath_list wird in Liste umgewandelt um Einträge bearbeiten zu können
         breath_list = [list(item) for item in breath_list]
         breath_duration_list = []
-        index = 0
-        # Ermittelt die Dauer jedes Atemzuges
+        pressure_peak_list = []
+
+        # ermittelt höchsten Druckwert und Dauer jedes Atemzuges. Speichert Parameter in zugehöriger Liste ab
         for i in breath_list:
+            pressure_peak = self.get_pressure_peak(i[1], i[2])
             breath_duration = i[2] - i[1]
+            pressure_peak_list.append(pressure_peak)
             breath_duration_list.append(breath_duration)
 
-        # ermittelt den Median aus der Liste der Atemzugdauern
+        # Median und Standardabweichung von Druck- und Dauerliste werden ermittelt
+        pressure_peak_median = statistics.median(pressure_peak_list)
+        pressure_peak_std_dev = statistics.stdev(pressure_peak_list)
         breath_duration_median = statistics.median(breath_duration_list)
-        # ermittelt die Standardabweichung aus der Liste der Atemzugdauern
         breath_duration_std_dev = statistics.stdev(breath_duration_list)
-        '''print("median", breath_duration_median)
-        print("std_dev", breath_duration_std_dev)
-        print("valider Bereich", breath_duration_median - 2 * breath_duration_std_dev, " bis ", breath_duration_median + 2 * breath_duration_std_dev)'''
 
-        # ermittelt Atemzüge mit einer Anomalie und markiert diese
-        for duration in breath_duration_list:
-            if duration < (breath_duration_median - 2 * breath_duration_std_dev) or duration > (breath_duration_median + 2 * breath_duration_std_dev):
-                if breath_list[index][4] == "-":
-                    breath_list[index][3] = 3
-                    breath_list[index][4] = f"ANOMALIE. Dauer: {duration:.2f}sek"
-            index += 1
+        # Grenzwerte für Druck und Dauer, zwischen denen ein Atemzug als valide gilt, werden ermittelt
+        self.min_pressure = pressure_peak_median - 2 * pressure_peak_std_dev
+        self.max_pressure = pressure_peak_median + 2 * pressure_peak_std_dev
+        self.min_duration = breath_duration_median - 2 * breath_duration_std_dev
+        self.max_duration = breath_duration_median + 2 * breath_duration_std_dev
 
+        # Atemzugliste wird durchlaufen und auf Anomalien geprüft
+        breath_index = 0
+        for data in breath_list:
+            duration_out_of_valid_area = False
+            pressure_out_of_valid_area = False
+
+            if breath_duration_list[breath_index] < self.min_duration or breath_duration_list[breath_index] > self.max_duration:
+                duration_out_of_valid_area = True
+
+            if pressure_peak_list[breath_index] < self.min_pressure or pressure_peak_list[breath_index] > self.max_pressure:
+                pressure_out_of_valid_area = True
+
+            # nur Werte, welche nicht in den ersten und letzten 5 Min vorhanden sind, betrachten
+            if data[4] == "-":
+                # markiert alle Anomalien mit entsprechendem Kommentar
+                if duration_out_of_valid_area is True and pressure_out_of_valid_area is False:
+                    data[3] = 3
+                    data[4] = f"ANOMALIE. Dauer: {breath_duration_list[breath_index]:.2f}sek"
+                elif duration_out_of_valid_area is False and pressure_out_of_valid_area is True:
+                    data[3] = 3
+                    data[4] = f"ANOMALIE. max Druck: {pressure_peak_list[breath_index]:.2f}mbar"
+                elif duration_out_of_valid_area is True and pressure_out_of_valid_area is True:
+                    data[3] = 3
+                    data[4] = f"ANOMALIE. Dauer: {breath_duration_list[breath_index]:.2f}sek, max Druck: {pressure_peak_list[breath_index]:.2f}mbar"
+
+            breath_index += 1
+
+        self.get_pressure_peak(breath_list[2004][1], breath_list[2004][2])
         # Liste wird wieder in die ursprüngliche Form (Tupel) umgewandelt
         breath_list = [tuple(item) for item in breath_list]
 
@@ -198,7 +244,6 @@ class AtemzugValidierungBreaths:
         pressure_values = [i for i in self.mask_edf_data[0, start_index:end_index] if i >= 1]
         pressure_median = statistics.median(pressure_values)
 
-        # ist diese Berechnung notwendig?
         pressure_median_limit = pressure_median + (0.6 * pressure_median)
 
         return pressure_median_limit
