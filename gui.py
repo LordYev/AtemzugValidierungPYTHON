@@ -523,6 +523,8 @@ class AtemzugValidierungGUI(tk.Tk):
                 # hier werden die Buttons erneut gesperrt, da diese Funktion zum wiederholten Plotten verwendet wird
                 self.backwards_button.config(state="disabled")
                 self.forwards_button.config(state="disabled")
+                self.fast_backwards_button.config(state="disabled")
+                self.fast_forwards_button.config(state="disabled")
 
                 # Leert die Eingabefelder
                 self.starting_point_entry.delete(0, tk.END)
@@ -545,6 +547,8 @@ class AtemzugValidierungGUI(tk.Tk):
             # Sperrt beide buttons
             self.backwards_button.config(state="disabled")
             self.forwards_button.config(state="disabled")
+            self.fast_backwards_button.config(state="disabled")
+            self.fast_forwards_button.config(state="disabled")
 
             # Leert die Eingabefelder
             self.starting_point_entry.delete(0, tk.END)
