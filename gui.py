@@ -206,6 +206,7 @@ class AtemzugValidierungGUI(tk.Tk):
         # führt beim Doppelklick die Funktion on_breath_double_click aus
         self.breath_list_area.bind("<Double-1>", self.on_breath_double_click)
 
+    # Funktion aktualisiert die Information für validen Druckbereich und Dauer
     def list_info_text(self):
         limit_info_label = tk.Label(self, text="Valider Druckbereich:\nValide Dauer:", justify="left")
         limit_info_label.grid(row=6, column=1, columnspan=10, padx=5, pady=5, sticky="w")
