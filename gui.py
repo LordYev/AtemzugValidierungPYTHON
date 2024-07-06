@@ -20,6 +20,8 @@ class AtemzugValidierungGUI(tk.Tk):
         self.starting_point = None
         self.forward = False
         self.backward = False
+        self.fast_forward = False
+        self.fast_backward = False
         self.breath_list_area = None
         self.breath_start = None
         self.breath_end = None
@@ -100,10 +102,12 @@ class AtemzugValidierungGUI(tk.Tk):
         self.forwards_button = tk.Button(self, text=">", command=lambda: self.go_forwards(), state="disabled", height=2, width=4)
         self.forwards_button.grid(row=3, column=3, columnspan=10, padx=115, pady=5, sticky="w")
 
-        self.fast_backwards_button = tk.Button(self, text="<<", state="disabled", height=2, width=1)
+        # Button für Fast-Validation rückwärts
+        self.fast_backwards_button = tk.Button(self, text="<<", command=lambda: self.go_fast_backwards(), state="disabled", height=2, width=1)
         self.fast_backwards_button.grid(row=3, column=3, columnspan=10, padx=5, pady=5, sticky="w")
 
-        self.fast_forwards_button = tk.Button(self, text=">>", state="disabled", height=2, width=1)
+        # Button für Fast-Validation vorwärts
+        self.fast_forwards_button = tk.Button(self, text=">>", command=lambda: self.go_fast_forwards(), state="disabled", height=2, width=1)
         self.fast_forwards_button.grid(row=3, column=3, columnspan=10, padx=180, pady=5, sticky="w")
 
         # Folgenden beiden Funktionen (1 & 2) ersetzen das Klicken auf die Buttons backwards_button & forwards_button durch das Nutzen der Pfeiltasten
@@ -298,7 +302,8 @@ class AtemzugValidierungGUI(tk.Tk):
                 if self.interval_is_showen is True:
                     self.breath_start = selected_data_values[1]
                     self.breath_end = selected_data_values[2]
-                    self.logic.use_multiple_funcs(self.starting_point, self.starting_point, self.forward, self.backward, self.breath_start, self.breath_end)
+                    self.logic.use_multiple_funcs(self.starting_point, self.starting_point, self.forward, self.backward, self.fast_backward,
+                                                  self.fast_forward, self.breath_start, self.breath_end)
                     self.breath_start = None
                     self.breath_end = None
 
@@ -404,8 +409,8 @@ class AtemzugValidierungGUI(tk.Tk):
         self.fast_backwards_button.config(state="normal")
         self.fast_forwards_button.config(state="normal")
         self.starting_point = self.starting_point_entry.get()
-        self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.forward, self.backward,
-                                      self.breath_start, self.breath_end)
+        self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.forward, self.backward, self.fast_backward,
+                                      self.fast_forward, self.breath_start, self.breath_end)
         self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
 
     # Funktion zum vor- und rückwärts Navigieren
@@ -413,10 +418,74 @@ class AtemzugValidierungGUI(tk.Tk):
         focus = self.focus_get()
         # Navigation soll nicht möglich sein, wenn Fokus noch auf Eingabefeld in Kommentarspalte liegt
         if str(focus).startswith(".!frame.!treeview.!entry") is not True:
-            self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.backward, self.forward,
-                                          self.breath_start, self.breath_end)
+            self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.backward, self.forward, self.fast_backward,
+                                          self.fast_forward, self.breath_start, self.breath_end)
             self.starting_point = self.logic.starting_point
             self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
+
+    def fast_validation_backwards_forwards(self):
+        starting_point = float(self.starting_point)
+        interval = float(self.logic.interval)
+        breath_list = self.breath.breath_list
+        first_data = None
+        last_data = None
+        index = 0
+
+        try:
+            # ermittelt den ersten Datensatz in der dargestellten Liste
+            for data in breath_list:
+                if float(breath_list[index][1]) >= starting_point:
+                    first_data = data
+                    index = 0
+                    break
+                index += 1
+
+            # ermittelt den letzten Datensatz in der dargestellten Liste
+            for data in breath_list:
+                if float(breath_list[index][2]) <= starting_point + interval and float(breath_list[index + 1][2]) >= starting_point + interval:
+                    last_data = data
+                    index = 0
+                    break
+                index += 1
+
+            # wird ausgeführt, wenn self.fast_forward == True ist
+            if self.fast_forward:
+                index = last_data[0]
+                # sucht die nächste Anomalie und ermittelt die Dauer bis zu dieser
+                for data in breath_list[index:]:
+                    if data[4].startswith("ANOMALIE"):
+                        self.logic.duration_to_next_anomaly = int(data[1] - starting_point)
+                        self.backwards_forwards_navigation()
+                        # wenn Button gesperrt ist, dann soll dieser entsperrt werden
+                        if self.fast_backwards_button.cget("state") == "disabled":
+                            self.fast_backwards_button.config(state="normal")
+                        break
+                    # wenn es keine weitere Anomalie gibt, dann soll Button gesperrt werden
+                    elif data[4] == "Atemzug befindet sich innerhalb der letzten 5 Minuten!":
+                        print("In dieser Richtung gibt es keine weiteren Anomalien!")
+                        self.fast_forwards_button.config(state="disabled")
+                        break
+
+            # wird ausgeführt, wenn self.fast_forward == True ist
+            if self.fast_backward:
+                index = first_data[0] - 1
+                # sucht die vorherige Anomalie und ermittelt die Dauer bis zu dieser
+                for data in reversed(breath_list[:index]):
+                    if data[4].startswith("ANOMALIE"):
+                        self.logic.duration_to_previous_anomaly = int(starting_point - data[1] + 1)
+                        self.backwards_forwards_navigation()
+                        # wenn Button gesperrt ist, dann soll dieser entsperrt werden
+                        if self.fast_forwards_button.cget("state") == "disabled":
+                            self.fast_forwards_button.config(state="normal")
+                        break
+                    # wenn es keine weitere Anomalie gibt, dann soll Button gesperrt werden
+                    elif data[4] == "Atemzug befindet sich innerhalb der ersten 5 Minuten!":
+                        print("In dieser Richtung gibt es keine weiteren Anomalien!")
+                        self.fast_backwards_button.config(state="disabled")
+                        break
+
+        except Exception as error_code:
+            print(f"\033[93mFehler bei Fast-Validation: {error_code}\033[0m")
 
     # Funktion um im Plot rückwärts zu navigieren
     def go_backwards(self):
@@ -429,6 +498,18 @@ class AtemzugValidierungGUI(tk.Tk):
         self.forward = True
         self.backwards_forwards_navigation()
         self.forward = False
+
+    # Funktion um direkt zur nächsten Anomalie zu springen
+    def go_fast_backwards(self):
+        self.fast_backward = True
+        self.fast_validation_backwards_forwards()
+        self.fast_backward = False
+
+    # Funktion um direkt zur vorherigen Anomalie zu springen
+    def go_fast_forwards(self):
+        self.fast_forward = True
+        self.fast_validation_backwards_forwards()
+        self.fast_forward = False
 
     # Funktion um einen festen Graphen wieder zugeben
     def update_canvas(self):

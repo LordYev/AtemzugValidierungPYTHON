@@ -12,6 +12,8 @@ class AtemzugValidierungLogic:
         self.y_max = 40.0  # y-Achse Maximalwert
         self.interval = 30.0  # Beatmungsintervall
         self.starting_point = 0.0  # Startpunkt des Intervalls
+        self.duration_to_next_anomaly = 0  # Dauer bis zur nächsten Anomalie
+        self.duration_to_previous_anomaly = 0  # Dauer bis zur vorherigen Anomalie
         self.canvas = None
         self.raw_mask_edf_data = None
         self.raw_device_edf_data = None
@@ -31,7 +33,7 @@ class AtemzugValidierungLogic:
         self.breath_search_end_point = None
 
     # Funktion zur Übergabe der Eingabe des Benutzers an die Variable starting_point
-    def set_starting_point(self, starting_point_entry, starting_point, backward, forward):
+    def set_starting_point(self, starting_point_entry, starting_point, backward, forward, fast_backward, fast_forward):
         start_point = float(starting_point)
 
         # Hier wird geschaut ob der Benutzer rückwerts oder vorwärts im Plot navigieren möchte,
@@ -40,6 +42,10 @@ class AtemzugValidierungLogic:
             self.starting_point = start_point - self.interval
         elif forward is True:
             self.starting_point = start_point + self.interval
+        elif fast_backward is True:
+            self.starting_point = start_point - self.duration_to_previous_anomaly
+        elif fast_forward is True:
+            self.starting_point = start_point + self.duration_to_next_anomaly
         else:
             self.starting_point = float(starting_point_entry)
 
@@ -48,8 +54,8 @@ class AtemzugValidierungLogic:
         self.interval = value
 
     # Funktion zum Aufrufen mehrerer Funktionen zeitgleich
-    def use_multiple_funcs(self, starting_point_entry, starting_point, backward, forward, breath_start, breath_end):
-        self.set_starting_point(starting_point_entry, starting_point, backward, forward)
+    def use_multiple_funcs(self, starting_point_entry, starting_point, backward, forward, fast_backward, fast_forward, breath_start, breath_end):
+        self.set_starting_point(starting_point_entry, starting_point, backward, forward, fast_backward, fast_forward)
         self.plot_edf_interval(self.mask_edf_meta_data, self.mask_edf_data, self.device_edf_meta_data, self.device_edf_data, self.starting_point,
                                self.interval, breath_start, breath_end)
 
