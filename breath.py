@@ -1,6 +1,6 @@
-from collections import Counter  # ermöglicht das Erstellen von Histogrammen
 import numpy as np
 import statistics
+
 
 class AtemzugValidierungBreaths:
     def __init__(self):
@@ -138,59 +138,6 @@ class AtemzugValidierungBreaths:
 
         return breath_list
 
-    # Funktion zur Ermittlung vom Anfang und Ende der Beatmung
-    # V1
-    '''def get_ventilation_start_end(self):
-        ventilation_start = None
-        ventilation_end = None
-
-        start_index = int(float(self.start_analyses_index) * self.mask_edf_meta_data['sfreq'])
-
-        # For-Schleife läuft vom start_index solange durch, bis es den Anfang der Beatmung ermittelt hat
-        for i in range(start_index, len(self.mask_edf_data[0]) - 1):
-            if self.mask_edf_data[0, i] > 1:
-                ventilation_start = i / 100
-                break
-
-        start_index = int(float(self.end_analyses_index) * self.mask_edf_meta_data['sfreq'])
-
-        # For-Schleife läuft rückwärts vom start_index solange durch, bis es das Ende der Beatmung ermittelt hat
-        for i in reversed(range(start_index)):
-            if self.mask_edf_data[0, i] > 1:
-                ventilation_end = i / 100
-                break
-
-        ventilation_start = int(ventilation_start * self.mask_edf_meta_data['sfreq'])
-        ventilation_end = int(ventilation_end * self.mask_edf_meta_data['sfreq'])
-
-        return ventilation_start, ventilation_end'''
-
-    # V2
-    '''def get_ventilation_start_end(self):
-        window_size = 5
-        ventilation_start = None
-        ventilation_end = None
-
-        start_index = int(float(self.start_analyses_index) * self.mask_edf_meta_data['sfreq'])
-        end_index = int(float(self.end_analyses_index) * self.mask_edf_meta_data['sfreq'])
-
-        # Berechne den gleitenden Durchschnitt
-        moving_average = np.convolve(self.mask_edf_data[0], np.ones(window_size) / window_size, mode='valid')
-
-        # For-Schleife läuft vom start_index solange durch, bis es den Anfang der Beatmung ermittelt hat
-        for i in range(start_index, len(moving_average)):
-            if moving_average[i] > 1:
-                ventilation_start = i + window_size - 1
-                break
-
-        # For-Schleife läuft rückwärts vom end_index solange durch, bis es das Ende der Beatmung ermittelt hat
-        for i in reversed(range(end_index - window_size)):
-            if moving_average[i] > 1:
-                ventilation_end = i + window_size - 1
-                break
-
-        return ventilation_start, ventilation_end'''
-
     # Funktion zum Ermitteln des Beatmungsbereiches
     def get_ventilation_area(self, start_index, reversed_func):
         ventilation_area_border = None
@@ -249,7 +196,7 @@ class AtemzugValidierungBreaths:
                 if new_start_index is not None:
                     return self.get_ventilation_area(new_start_index, reversed_func)
 
-    # V3
+    # Funktion zur Ermittlung vom Anfang und Ende der Beatmung
     def get_ventilation_start_end(self):
         # Parameter auf True setzen, damit Funktion get_ventilation_area die Liste vorwärts durchläuft
         reversed_func = False
