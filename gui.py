@@ -25,7 +25,6 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath_list_area = None
         self.breath_start = None
         self.breath_end = None
-        self.selected_breath = None
         self.selected_breath_index = None
         self.interval_is_showen = False
         self.column_headers = None
@@ -576,6 +575,11 @@ class AtemzugValidierungGUI(tk.Tk):
         folder_path = filedialog.askdirectory()
         try:
             if folder_path:
+                # setzt alle Parameter zurück, damit diese die neue Beatmungsdatei nicht beeinflussen
+                self.all_parameters_set_back()
+                self.logic.all_parameters_set_back()
+                self.breath.all_parameters_set_back()
+
                 folder_path_text.delete(1.0, tk.END)
                 folder_path_text.insert(tk.END, folder_path)
                 mask_edf_file_path = None
@@ -641,3 +645,13 @@ class AtemzugValidierungGUI(tk.Tk):
 
         except Exception as error_code:
             print(f"\033[93mFehler beim Darstellen des EDF-Graphen: {error_code}\033[0m")
+
+    # Funktion zum Zurücksetzen der wichtigsten Parameter
+    def all_parameters_set_back(self):
+        self.mask_edf_path = None
+        self.device_edf_path = None
+        self.starting_point = None
+        self.breath_start = None
+        self.breath_end = None
+        self.selected_breath_index = None
+        self.interval_is_showen = False
