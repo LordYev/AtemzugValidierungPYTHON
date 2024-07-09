@@ -15,6 +15,8 @@ class AtemzugValidierungBreaths:
         self.max_pressure = None
         self.min_duration = None
         self.max_duration = None
+        self.ventilation_start = None
+        self.ventilation_end = None
         # Start- und Endpunkt in denen das Programm die Atemzüge ermittelt
         self.start_analyses_index = 0.0
         self.end_analyses_index = 0.0
@@ -189,50 +191,79 @@ class AtemzugValidierungBreaths:
 
         return ventilation_start, ventilation_end'''
 
+    # Funktion zum Ermitteln des Beatmungsbereiches
+    def get_ventilation_area(self, start_index, reversed_func):
+        ventilation_area_border = None
+        new_start_index = None
+
+        # For-Schleife läuft vom start_index solange durch, bis es einen Ausschlag (>1mbar) gefunden hat
+        # durchläuft von links nach rechts
+        if reversed_func is False:
+            for i in range(start_index, len(self.mask_edf_data[0]) - 1):
+                if self.mask_edf_data[0, i] > 1:
+                    ventilation_area_border = i
+                    break
+        # durchläuft von rechts nach links
+        elif reversed_func is True:
+            for j in reversed(range(start_index)):
+                if self.mask_edf_data[0, j] > 1:
+                    ventilation_area_border = j
+                    break
+
+        # Test-Liste wird erstellt und mit Werten der nächsten 100sek befüllt
+        pressure_test_values = []
+        # durchläuft von links nach rechts
+        if reversed_func is False:
+            if ventilation_area_border is not None:
+                for i in range(ventilation_area_border, min(ventilation_area_border + 10000, len(self.mask_edf_data[0]))):
+                    pressure_test_values.append(self.mask_edf_data[0, i])
+        # durchläuft von rechts nach links
+        elif reversed_func is True:
+            if ventilation_area_border is not None:
+                for j in reversed(range(max(ventilation_area_border - 10000, 0), ventilation_area_border)):
+                    pressure_test_values.append(self.mask_edf_data[0, j])
+
+        pressure_values_sum = sum(pressure_test_values)
+        pressure_values_count = len(pressure_test_values)
+        average = pressure_values_sum / pressure_values_count
+        # Durchschnitt wird berechnet um zu schauen, ob es der Beginn der Beatmung, oder nur ein Ausschlag in der Kurve war
+        if pressure_test_values:
+            # wenn Durchschnitt größer als 1 mbar, dann setze Beatmungsstartpunkt fest
+            if average >= 1:
+                return ventilation_area_border
+            else:
+                # suche nächsten Index, der unter 1mbar liegt.
+                # durchläuft von links nach rechts
+                if reversed_func is False:
+                    for i in range(ventilation_area_border, len(self.mask_edf_data[0]) - 1):
+                        if self.mask_edf_data[0, i] < 1:
+                            new_start_index = i
+                            break
+                # durchläuft von rechts nach links
+                if reversed_func is True:
+                    for j in reversed(range(0, ventilation_area_border)):
+                        if self.mask_edf_data[0, j] < 1:
+                            new_start_index = j
+                            break
+                # Funktion wird rekursiv aufgerufen
+                if new_start_index is not None:
+                    return self.get_ventilation_area(new_start_index, reversed_func)
+
     # V3
     def get_ventilation_start_end(self):
-        ventilation_start = None
-        ventilation_end = None
+        # Parameter auf True setzen, damit Funktion get_ventilation_area die Liste vorwärts durchläuft
+        reversed_func = False
 
+        # beginnt die Suche nach dem Beatmungsbereich, nach den Synchronisierungspunkten am Anfang
         start_index = int(float(self.start_analyses_index) * self.mask_edf_meta_data['sfreq'])
+        ventilation_start = self.get_ventilation_area(start_index, reversed_func)
 
-        # For-Schleife läuft vom start_index solange durch, bis es den Anfang der Beatmung ermittelt hat
-        for i in range(start_index, len(self.mask_edf_data[0]) - 1):
-            if self.mask_edf_data[0, i] > 1:
-                ventilation_start = i
-                # Test-Liste wird erstellt und mit Werten der nächsten 10sek befüllt
-                test_values = []
-                for index in range(ventilation_start, min(ventilation_start + 1000, len(self.mask_edf_data[0]))):
-                    test_values.append(self.mask_edf_data[0, index])
-                # Durchschnitt wird berechnet um zu schauen, ob es der Beginn der Beatmung, oder nur ein Ausschlag in der Kurve war
-                values_sum = sum(test_values)
-                values_count = len(test_values)
-                if values_count > 0:
-                    average = values_sum / values_count
-                    # wenn Durchschnitt größer als 1, dann setze Beatmungsstartpunkt fest
-                    if average >= 1:
-                        break
-                    else:
-                        ventilation_start = None
+        # Parameter auf True setzen, damit Funktion get_ventilation_area die Liste rückwärts durchläuft
+        reversed_func = True
 
+        # beginnt die Suche nach dem Beatmungsbereich, nach den Synchronisierungspunkten am Ende
         start_index = int(float(self.end_analyses_index) * self.mask_edf_meta_data['sfreq'])
-
-        # For-Schleife läuft rückwärts vom start_index solange durch, bis es das Ende der Beatmung ermittelt hat
-        # gleicher Algorithmus wie zuvor, nur rückwärts
-        for i in reversed(range(start_index)):
-            if self.mask_edf_data[0, i] > 1:
-                ventilation_end = i
-                test_values = []
-                for index in reversed(range(max(ventilation_end - 1000, 0), ventilation_end)):
-                    test_values.append(self.mask_edf_data[0, index])
-                values_sum = sum(test_values)
-                values_count = len(test_values)
-                if values_count > 0:
-                    average = values_sum / values_count
-                    if average >= 1:
-                        break
-                    else:
-                        ventilation_start = None
+        ventilation_end = self.get_ventilation_area(start_index, reversed_func)
 
         return ventilation_start, ventilation_end
 
