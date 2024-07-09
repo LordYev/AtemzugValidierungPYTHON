@@ -185,7 +185,7 @@ class AtemzugValidierungLogic:
             # Plottet die neuen Linien für das Intervall
             ax.plot(mask_interval, mask_edf_data[0, mask_start_index:mask_end_index][:min_length], label="Mask", color="blue")
             ax.plot(device_interval, scaled_device_data, label="Device", color="red")
-            ax.axhline(self.pressure_median, label="Grenzwert", color="green", linestyle="dashed")
+            ax.axhline(self.pressure_median, label="Schwellenwert", color="green", linestyle="dashed")
 
             # Wenn die übergebenen Variablen Zeitpunkte haben, dann soll dort jeweils eine Senkrechte Linie geplottet werden
             if breath_start and breath_end is not None:
