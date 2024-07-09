@@ -577,8 +577,6 @@ class AtemzugValidierungGUI(tk.Tk):
             if folder_path:
                 # setzt alle Parameter zurück, damit diese die neue Beatmungsdatei nicht beeinflussen
                 self.all_parameters_set_back()
-                self.logic.all_parameters_set_back()
-                self.breath.all_parameters_set_back()
 
                 folder_path_text.delete(1.0, tk.END)
                 folder_path_text.insert(tk.END, folder_path)
@@ -648,6 +646,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
     # Funktion zum Zurücksetzen der wichtigsten Parameter
     def all_parameters_set_back(self):
+        # Parameter der Klasse AtemzugValidierungGUI
         self.mask_edf_path = None
         self.device_edf_path = None
         self.starting_point = None
@@ -655,3 +654,42 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath_end = None
         self.selected_breath_index = None
         self.interval_is_showen = False
+
+        # Parameter der Klasse AtemzugValidierungLogic
+        self.logic.interval = 30.0
+        self.logic.starting_point = 0.0
+        self.logic.duration_to_next_anomaly = 0
+        self.logic.duration_to_previous_anomaly = 0
+        self.logic.raw_mask_edf_data = None
+        self.logic.raw_device_edf_data = None
+        self.logic.mask_edf_meta_data = None
+        self.logic.mask_edf_data = None
+        self.logic.mask_edf_times = None
+        self.logic.duration_mask = None
+        self.logic.device_edf_meta_data = None
+        self.logic.device_edf_data = None
+        self.logic.device_edf_times = None
+        self.logic.duration_device = None
+        self.logic.scale_factor = None
+        self.logic.time_difference_start = None
+        self.logic.time_difference_end = None
+        self.logic.pressure_median = None
+        self.logic.breath_search_start_point = None
+        self.logic.breath_search_end_point = None
+
+        # Parameter der Klasse AtemzugValidierungBreaths
+        self.breath.breath_list = None
+        self.breath.breath_list_valid_data = None
+        self.breath.breath_list_invalid_data = None
+        self.breath.breath_list_commented_data = None
+        self.breath.mask_edf_meta_data = None
+        self.breath.mask_edf_data = None
+        self.breath.pressure_median = None
+        self.breath.min_pressure = None
+        self.breath.max_pressure = None
+        self.breath.min_duration = None
+        self.breath.max_duration = None
+        self.breath.ventilation_start = None
+        self.breath.ventilation_end = None
+        self.breath.start_analyses_index = 0.0
+        self.breath.end_analyses_index = 0.0

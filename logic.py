@@ -315,26 +315,3 @@ class AtemzugValidierungLogic:
             self.canvas.get_tk_widget().destroy()
 
         self.canvas = canvas
-
-    # Funktion zum Zurücksetzen der wichtigsten Parameter
-    def all_parameters_set_back(self):
-        self.interval = 30.0
-        self.starting_point = 0.0
-        self.duration_to_next_anomaly = 0
-        self.duration_to_previous_anomaly = 0
-        self.raw_mask_edf_data = None
-        self.raw_device_edf_data = None
-        self.mask_edf_meta_data = None
-        self.mask_edf_data = None
-        self.mask_edf_times = None
-        self.duration_mask = None
-        self.device_edf_meta_data = None
-        self.device_edf_data = None
-        self.device_edf_times = None
-        self.duration_device = None
-        self.scale_factor = None
-        self.time_difference_start = None
-        self.time_difference_end = None
-        self.pressure_median = None
-        self.breath_search_start_point = None
-        self.breath_search_end_point = None

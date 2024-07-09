@@ -225,21 +225,3 @@ class AtemzugValidierungBreaths:
         pressure_median_limit = pressure_median + (0.6 * pressure_median)
 
         return pressure_median_limit
-
-    # Funktion zum Zurücksetzen der wichtigsten Parameter
-    def all_parameters_set_back(self):
-        self.breath_list = None
-        self.breath_list_valid_data = None
-        self.breath_list_invalid_data = None
-        self.breath_list_commented_data = None
-        self.mask_edf_meta_data = None
-        self.mask_edf_data = None
-        self.pressure_median = None
-        self.min_pressure = None
-        self.max_pressure = None
-        self.min_duration = None
-        self.max_duration = None
-        self.ventilation_start = None
-        self.ventilation_end = None
-        self.start_analyses_index = 0.0
-        self.end_analyses_index = 0.0
