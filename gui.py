@@ -109,7 +109,8 @@ class AtemzugValidierungGUI(tk.Tk):
             try:
                 self.go_backwards()
             except Exception as error_code:
-                print(f"\033[93mFehler beim rückwärts Navigieren: {error_code}\033[0m")
+                print(f"\033[31m ERROR \033[33m Fehler beim rückwärts Navigieren: \033[93m {error_code} \033[0m")
+                print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m trigger_backwards_button() \033[0m")
         self.bind("<Left>", trigger_backwards_button)
 
         # Funktion 2
@@ -117,7 +118,8 @@ class AtemzugValidierungGUI(tk.Tk):
             try:
                 self.go_forwards()
             except Exception as error_code:
-                print(f"\033[93mFehler beim vorwärts Navigieren: {error_code}\033[0m")
+                print(f"\033[31m ERROR \033[33m Fehler beim vorwärts Navigieren: \033[93m {error_code} \033[0m")
+                print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m trigger_forwards_button() \033[0m")
         self.bind("<Right>", trigger_forwards_button)
 
         # Button um die ganze Grafik wieder anzuzeigen
@@ -134,15 +136,23 @@ class AtemzugValidierungGUI(tk.Tk):
         self.interval_entry = tk.Entry(self, width=8, state="readonly")
         self.interval_entry.grid(row=4, column=1, padx=5, pady=5, sticky="w")
 
+        def set_interval():
+            try:
+                interval = self.interval_entry.get()
+                self.logic.set_interval(float(interval))
+            except Exception as error_code:
+                print(f"\033[31m ERROR \033[33m Fehler beim Festlegen eines Intervalls: \033[93m {error_code} \033[0m")
+                print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m set_interval() \033[0m")
+
         # Button zum Speichern des Intervalls
         self.save_interval_button = tk.Button(self, text="Intervall speichern",
-                                              command=lambda: self.logic.set_interval(float(self.interval_entry.get())), state="disabled",
+                                              command=lambda: set_interval(), state="disabled",
                                               height=2, width=12, wraplength=120)
         self.save_interval_button.grid(row=4, column=2, padx=5, pady=5, sticky="w")
 
         # Ersetzt das Klicken auf den save_interval_button durch einen Klick auf die Enter Taste. Button ist weiterhin aktiv.
         def trigger_save_interval_button(event):
-            self.logic.set_interval(float(self.interval_entry.get()))
+            set_interval()
             self.focus()
         self.interval_entry.bind("<Return>", trigger_save_interval_button)
 
@@ -235,8 +245,8 @@ class AtemzugValidierungGUI(tk.Tk):
                 input_window.destroy()
 
             except Exception as error_code:
-                print(f"\033[93mFehler bei Eingabe von Zeiten: {error_code}\033[0m")
-                print("Klasse: AtemzugValidierungGUI / Funktion: close_window()")
+                print(f"\033[31m ERROR \033[33m Fehler bei Eingabe von Zeiten: \033[93m {error_code} \033[0m")
+                print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m close_window() \033[0m")
 
         label = tk.Label(top_frame, text="Bitte geben Sie zwei Zeitpunkte an. \n\n Startzeitpunkt muss VOR der Beatmung liegen! \n"
                                          "Endzeitpunk muss NACH der Beatmung liegen!")
@@ -365,8 +375,8 @@ class AtemzugValidierungGUI(tk.Tk):
                 self.selected_breath_index = int(breath_number) - 1
 
         except Exception as error_code:
-            print(f"\033[93mFehler bei Auswahl eines Datensatzes: {error_code}\033[0m")
-            print("Klasse: AtemzugValidierungGUI / Funktion: on_breath_selection()")
+            print(f"\033[31m ERROR \033[33m Fehler bei Auswahl eines Datensatzes: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m on_breath_selection() \033[0m")
 
     # Funktion welche beim Doppelklick auf die Spalte "Kommentar" ausgeführt wird
     def on_breath_double_click(self, event):
@@ -457,15 +467,20 @@ class AtemzugValidierungGUI(tk.Tk):
     # Funktion um den Startpunkt des Intervalls in einer Variable abzuspeichern
     # Zusätzlich werden die Buttons backwards_button & forwards_button freigegeben
     def set_starting_point(self):
-        self.interval_is_showen = True
-        self.backwards_button.config(state="normal")
-        self.forwards_button.config(state="normal")
-        self.fast_backwards_button.config(state="normal")
-        self.fast_forwards_button.config(state="normal")
-        self.starting_point = self.starting_point_entry.get()
-        self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.forward, self.backward, self.fast_backward,
-                                      self.fast_forward, self.breath_start, self.breath_end)
-        self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
+        try:
+            self.interval_is_showen = True
+            self.backwards_button.config(state="normal")
+            self.forwards_button.config(state="normal")
+            self.fast_backwards_button.config(state="normal")
+            self.fast_forwards_button.config(state="normal")
+            self.starting_point = self.starting_point_entry.get()
+            self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.forward, self.backward, self.fast_backward,
+                                          self.fast_forward, self.breath_start, self.breath_end)
+            self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
+
+        except Exception as error_code:
+            print(f"\033[31m ERROR \033[33m Fehler beim Festlegen eines Startpunktes: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m set_starting_point() \033[0m")
 
     # Funktion zum vor- und rückwärts Navigieren
     def backwards_forwards_navigation(self):
@@ -539,8 +554,8 @@ class AtemzugValidierungGUI(tk.Tk):
                         break
 
         except Exception as error_code:
-            print(f"\033[93mFehler bei Fast-Validation: {error_code}\033[0m")
-            print("Klasse: AtemzugValidierungGUI / Funktion: fast_validation_backwards_forwards()")
+            print(f"\033[31m ERROR \033[33m Fehler bei Fast-Validation: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m fast_validation_backwards_forwards() \033[0m")
 
     # Funktion um im Plot rückwärts zu navigieren
     def go_backwards(self):
@@ -572,50 +587,60 @@ class AtemzugValidierungGUI(tk.Tk):
         canvas.grid(row=2, column=0, columnspan=10, padx=5, pady=5, sticky='w')
 
     def determine_breaths(self):
-        # Übergabe der Zeitpunkte zwischen welchen die Atemzüge ermittelt werden
-        self.breath.start_analyses_index = self.logic.breath_search_start_point
-        self.breath.end_analyses_index = self.logic.breath_search_end_point
+        try:
+            # Übergabe der Zeitpunkte zwischen welchen die Atemzüge ermittelt werden
+            self.breath.start_analyses_index = self.logic.breath_search_start_point
+            self.breath.end_analyses_index = self.logic.breath_search_end_point
 
-        # Atemzüge werden ermittelt und in Liste gespeichert
-        self.breath.breath_list = self.breath.get_breaths()
-        # Übergibt Grenzwert aus breath an logic
-        self.logic.pressure_median = self.breath.pressure_median
+            # Atemzüge werden ermittelt und in Liste gespeichert
+            self.breath.breath_list = self.breath.get_breaths()
+            # Übergibt Grenzwert aus breath an logic
+            self.logic.pressure_median = self.breath.pressure_median
 
-        # Entsperrt Buttons
-        self.interval_button.config(state="normal")
-        self.save_interval_button.config(state="normal")
-        self.full_graph_button.config(state="normal")
-        self.starting_point_entry.config(state="normal")
-        self.interval_entry.config(state="normal")
-        self.thirty_sec_interval_button.config(state="normal")
-        self.sixty_sec_interval_button.config(state="normal")
-        self.new_breath_area_button.config(state="normal")
-        self.invalid_breath_button.config(state="normal")
-        self.export_button.config(state="normal")
+            # Entsperrt Buttons
+            self.interval_button.config(state="normal")
+            self.save_interval_button.config(state="normal")
+            self.full_graph_button.config(state="normal")
+            self.starting_point_entry.config(state="normal")
+            self.interval_entry.config(state="normal")
+            self.thirty_sec_interval_button.config(state="normal")
+            self.sixty_sec_interval_button.config(state="normal")
+            self.new_breath_area_button.config(state="normal")
+            self.invalid_breath_button.config(state="normal")
+            self.export_button.config(state="normal")
 
-        self.clear_list_area()
-        self.fill_list_area()
+            self.clear_list_area()
+            self.fill_list_area()
+
+        except Exception as error_code:
+            print(f"\033[31m ERROR \033[33m Fehler beim Bestimmen der Atemzüge: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m determine_breaths() \033[0m")
 
     def determine_breaths_in_interval(self, interval_start, interval_duration):
-        self.clear_list_area()
-        interval_end = int(interval_start) + int(interval_duration)
+        try:
+            self.clear_list_area()
+            interval_end = int(interval_start) + int(interval_duration)
 
-        # Ermittlung des ersten Atemzuges im Intervall
-        first_breath_start = None
-        for i in self.breath.breath_list:
-            if i[1] >= int(interval_start):
-                first_breath_start = i[0] - 1
-                break
+            # Ermittlung des ersten Atemzuges im Intervall
+            first_breath_start = None
+            for i in self.breath.breath_list:
+                if i[1] >= int(interval_start):
+                    first_breath_start = i[0] - 1
+                    break
 
-        # Füllt die Liste mit den im Plot angezeigten Atemzügen
-        for i in self.breath.breath_list[first_breath_start:]:
-            if interval_end >= i[2]:
-                value_start = f"{i[1]:.2f}"
-                value_end = f"{i[2]:.2f}"
+            # Füllt die Liste mit den im Plot angezeigten Atemzügen
+            for i in self.breath.breath_list[first_breath_start:]:
+                if interval_end >= i[2]:
+                    value_start = f"{i[1]:.2f}"
+                    value_end = f"{i[2]:.2f}"
 
-                self.breath_list_area.insert("", "end", values=(i[0], value_start, value_end, i[3], i[4]))
-            else:
-                break
+                    self.breath_list_area.insert("", "end", values=(i[0], value_start, value_end, i[3], i[4]))
+                else:
+                    break
+
+        except Exception as error_code:
+            print(f"\033[31m ERROR \033[33m Fehler beim Bestimmen der Atemzüge im Intervall: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m determine_breaths_in_interval() \033[0m")
 
     # Funktion zum Auswählen eines Ordners mit zwei EDF-Dateien (mask.edf & device.edf)
     def load_edf_files(self, folder_path_text):
@@ -662,8 +687,8 @@ class AtemzugValidierungGUI(tk.Tk):
                 self.interval_entry.delete(0, tk.END)
 
         except Exception as error_code:
-            print(f"\033[93mFehler beim laden der EDF-Dateien: {error_code}\033[0m")
-            print("Klasse: AtemzugValidierungGUI / Funktion: load_edf_files()")
+            print(f"\033[31m ERROR \033[33m Fehler beim laden der EDF-Dateien: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m load_edf_files() \033[0m")
 
     def plot_back_edf_file(self, mask_edf_file_path, device_edf_file_path):
         try:
@@ -690,8 +715,8 @@ class AtemzugValidierungGUI(tk.Tk):
             self.starting_point = None
 
         except Exception as error_code:
-            print(f"\033[93mFehler beim Darstellen des EDF-Graphen: {error_code}\033[0m")
-            print("Klasse: AtemzugValidierungGUI / Funktion: plot_back_edf_file()")
+            print(f"\033[31m ERROR \033[33m Fehler beim Darstellen des EDF-Graphen: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m plot_back_edf_file() \033[0m")
 
     # Funktion zum Zurücksetzen der wichtigsten Parameter
     def all_parameters_set_back(self):

@@ -206,8 +206,8 @@ class AtemzugValidierungLogic:
             print("Anzahl der geöffneten Figuren:", num_figures)"""
 
         except Exception as error_code:
-            print(f"\033[93mFehler beim Plotten der Daten: {error_code}\033[0m")
-            print("Klasse: AtemzugValidierungLogic / Funktion: plot_edf_interval()")
+            print(f"\033[31m ERROR \033[33m Fehler beim Plotten der Daten: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungLogic \033[33m / Funktion: \033[93m plot_edf_interval() \033[0m")
 
     # Funktion um EDF-Datei zu einzulesen
     def read_edf_file(self, mask_edf_file_path, device_edf_file_path):
@@ -235,8 +235,8 @@ class AtemzugValidierungLogic:
 
         # sollte ein Fehler beim Plotten der EDF-Datei auftreten, gib diese Meldung aus
         except Exception as error_code:
-            print(f"\033[93mFehler beim Verarbeiten der EDF-Datei: {error_code}\033[0m")
-            print("Klasse: AtemzugValidierungLogic / Funktion: read_edf_file()")
+            print(f"\033[31m ERROR \033[33m Fehler beim Verarbeiten der EDF-Datei: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungLogic \033[33m / Funktion: \033[93m read_edf_file() \033[0m")
 
     # Funktion um EDF-Datei zu plotten
     def plot_edf_data(self):
