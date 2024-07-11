@@ -43,15 +43,9 @@ class AtemzugValidierungGUI(tk.Tk):
 
 
         # Folgend werden GUI Elemente gebaut
-        '''self.load_mat_file_button = tk.Button(self, text="MAT Datei auswählen", command=lambda: self.load_mat_file(self.mat_file_path_text))
-        self.load_mat_file_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")'''
-
         self.load_edf_file_button = tk.Button(self, text="EDF Ordner auswählen", command=lambda: self.load_edf_files(self.folder_path_text),
                                               height=2, width=12, wraplength=120)
         self.load_edf_file_button.grid(row=1, column=0, padx=5, pady=5, sticky="w")
-
-        '''self.mat_file_path_text = tk.Text(self, height=1, width=100, wrap=tk.NONE)
-        self.mat_file_path_text.grid(row=0, column=1, columnspan=10, padx=5, pady=5, sticky="w")'''
 
         self.folder_path_text = tk.Text(self, height=1, width=100, wrap=tk.NONE)
         self.folder_path_text.grid(row=1, column=1, columnspan=10, padx=5, pady=5, sticky="w")
@@ -242,6 +236,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
             except Exception as error_code:
                 print(f"\033[93mFehler bei Eingabe von Zeiten: {error_code}\033[0m")
+                print("Klasse: AtemzugValidierungGUI / Funktion: close_window()")
 
         label = tk.Label(top_frame, text="Bitte geben Sie zwei Zeitpunkte an. \n\n Startzeitpunkt muss VOR der Beatmung liegen! \n"
                                          "Endzeitpunk muss NACH der Beatmung liegen!")
@@ -371,6 +366,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
         except Exception as error_code:
             print(f"\033[93mFehler bei Auswahl eines Datensatzes: {error_code}\033[0m")
+            print("Klasse: AtemzugValidierungGUI / Funktion: on_breath_selection()")
 
     # Funktion welche beim Doppelklick auf die Spalte "Kommentar" ausgeführt wird
     def on_breath_double_click(self, event):
@@ -544,6 +540,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
         except Exception as error_code:
             print(f"\033[93mFehler bei Fast-Validation: {error_code}\033[0m")
+            print("Klasse: AtemzugValidierungGUI / Funktion: fast_validation_backwards_forwards()")
 
     # Funktion um im Plot rückwärts zu navigieren
     def go_backwards(self):
@@ -620,16 +617,6 @@ class AtemzugValidierungGUI(tk.Tk):
             else:
                 break
 
-    # Funktion zum Auswählen eines Dateipfades/einer MAT-Datei und Anzeigen des MAT-Grafen
-    def load_mat_file(self, mat_file_path_text):
-        mat_file_path = filedialog.askopenfilename(filetypes=[("MAT Files", "*.mat")])
-        if mat_file_path:
-            mat_file_path_text.delete(1.0, tk.END)
-            mat_file_path_text.insert(tk.END, mat_file_path)
-            self.logic.read_mat_file(mat_file_path)
-
-            self.update_canvas()
-
     # Funktion zum Auswählen eines Ordners mit zwei EDF-Dateien (mask.edf & device.edf)
     def load_edf_files(self, folder_path_text):
         folder_path = filedialog.askdirectory()
@@ -676,6 +663,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
         except Exception as error_code:
             print(f"\033[93mFehler beim laden der EDF-Dateien: {error_code}\033[0m")
+            print("Klasse: AtemzugValidierungGUI / Funktion: load_edf_files()")
 
     def plot_back_edf_file(self, mask_edf_file_path, device_edf_file_path):
         try:
@@ -703,6 +691,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
         except Exception as error_code:
             print(f"\033[93mFehler beim Darstellen des EDF-Graphen: {error_code}\033[0m")
+            print("Klasse: AtemzugValidierungGUI / Funktion: plot_back_edf_file()")
 
     # Funktion zum Zurücksetzen der wichtigsten Parameter
     def all_parameters_set_back(self):

@@ -1,7 +1,6 @@
 import numpy as np  # numpy ist eine Bibliothek für numerische Berechnungen in Python
 import matplotlib.pyplot as plt  # Bibliothek für die Erstellung von Grafiken und Diagrammen in Python
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from scipy.io import loadmat  # ermöglicht das Lesen und Schreiben von MATLAB-Dateien
 import mne
 
 
@@ -208,6 +207,7 @@ class AtemzugValidierungLogic:
 
         except Exception as error_code:
             print(f"\033[93mFehler beim Plotten der Daten: {error_code}\033[0m")
+            print("Klasse: AtemzugValidierungLogic / Funktion: plot_edf_interval()")
 
     # Funktion um EDF-Datei zu einzulesen
     def read_edf_file(self, mask_edf_file_path, device_edf_file_path):
@@ -236,6 +236,7 @@ class AtemzugValidierungLogic:
         # sollte ein Fehler beim Plotten der EDF-Datei auftreten, gib diese Meldung aus
         except Exception as error_code:
             print(f"\033[93mFehler beim Verarbeiten der EDF-Datei: {error_code}\033[0m")
+            print("Klasse: AtemzugValidierungLogic / Funktion: read_edf_file()")
 
     # Funktion um EDF-Datei zu plotten
     def plot_edf_data(self):
@@ -278,40 +279,3 @@ class AtemzugValidierungLogic:
         # Zeigt mir die Anzahl aktuell geöffneter Plots
         """num_figures = len(plt.get_fignums())
         print("Anzahl der geöffneten Figuren:", num_figures)"""
-
-    # Funktion um MAT-Datei zu plotten
-    def read_mat_file(self, mat_file_path):
-        try:
-            mat_file = loadmat(mat_file_path)  # öffnet die MAT-Datei mit scipy und speichert die Daten in mat_file
-
-            # Abfrage ob Schlüssel "rawDevice" in der MAT-Datei enthalten ist
-            if "rawDevice" in mat_file:
-                my_data = mat_file["rawDevice"]  # extrahiert die Daten unter dem Schlüssel "rawDevice" und speichert diese unter my_data
-                self.plot_mat_data(my_data)
-                print(my_data)  # druckt zum Test die Daten in der Konsole aus (NICHT NOTWENDIG)
-
-            # Abfrage ob Schlüssel "rawMask" in der MAT-Datei enthalten ist
-            elif "rawMask" in mat_file:
-                my_data = mat_file["rawMask"]
-                self.plot_mat_data(my_data)
-                print(my_data)  # druckt zum Test die Daten in der Konsole aus (NICHT NOTWENDIG)
-
-            else:
-                print("Schlüssel 'my_data' nicht gefunden in der .mat-Datei.")
-
-        # es wird eine Fehlermeldung angezeigt, sollte ein Fehler beim Aufrufen einer MAT-Datei auftreten
-        except Exception as error_code:
-            print(f"\033[93mFehler beim Verarbeiten der MAT-Datei: {error_code}\033[0m")
-
-    def plot_mat_data(self, my_data):
-        fig, ax = plt.subplots(1, 1, figsize=(10, 4))
-        ax.plot(my_data)
-        ax.set_xlabel("X-Achse")
-        ax.set_ylabel("Y-Achse")
-        ax.set_title("Grafische Darstellung der Daten aus der .mat-Datei")
-        canvas = FigureCanvasTkAgg(fig)
-
-        if hasattr(self, "canvas") and self.canvas:
-            self.canvas.get_tk_widget().destroy()
-
-        self.canvas = canvas
