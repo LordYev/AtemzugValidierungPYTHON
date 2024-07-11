@@ -166,6 +166,10 @@ class AtemzugValidierungGUI(tk.Tk):
                                               height=2, width=8)
         self.sixty_sec_interval_button.grid(row=4, column=3, padx=115, pady=5, sticky="w")
 
+        self.new_breath_area_button = tk.Button(self, text="Beatmungsbereich neu berechnen", command=lambda: self.set_new_breath_area(),
+                                                state="disabled", height=2, width=12, wraplength=120)
+        self.new_breath_area_button.grid(row=4, column=4, padx=5, pady=5, sticky="w")
+
     # Funktion zur erstellung des Bereiches, in dem die Liste der Atemzüge angezeigt werden soll
     def gui_list_area(self):
         self.column_headers = ["Nr", "Start (sek)", "Ende (sek)", "Status", "Kommentar"]
@@ -208,6 +212,61 @@ class AtemzugValidierungGUI(tk.Tk):
         # ermöglicht einen Doppelklick in der Liste
         # führt beim Doppelklick die Funktion on_breath_double_click aus
         self.breath_list_area.bind("<Double-1>", self.on_breath_double_click)
+
+    # Funktion ermöglicht die Festlegung eines Bereiches, in dem die Beatmung ermittelt werden soll
+    def set_new_breath_area(self):
+        # Neues Fenster
+        input_window = tk.Toplevel(master=self)
+        input_window.geometry("300x150")
+        input_window.resizable(False, False)
+        top_frame = tk.Frame(input_window)
+        top_frame.pack(side="top")
+        bottom_frame = tk.Frame(input_window)
+        bottom_frame.pack(side="bottom")
+        first_bottom_frame = tk.Frame(bottom_frame)
+        first_bottom_frame.pack(side="top")
+        second_bottom_frame = tk.Frame(bottom_frame)
+        second_bottom_frame.pack(side="bottom")
+
+        # Funktion zum Abschließen des Vorgangs im Fenster
+        def close_window():
+            try:
+                # Eingabewerte werden übergeben
+                self.logic.breath_search_start_point = start_analyses_index_entry.get()
+                self.logic.breath_search_end_point = end_analyses_index_entry.get()
+
+                self.determine_breaths()
+
+                # Fenster wird wieder geschlossen
+                input_window.destroy()
+
+            except Exception as error_code:
+                print(f"\033[93mFehler bei Eingabe von Zeiten: {error_code}\033[0m")
+
+        label = tk.Label(top_frame, text="Bitte geben Sie zwei Zeitpunkte an. \n\n Startzeitpunkt muss VOR der Beatmung liegen! \n"
+                                         "Endzeitpunk muss NACH der Beatmung liegen!")
+        label.pack(padx=5, pady=5)
+
+        start_label = tk.Label(first_bottom_frame, text="Start:")
+        start_label.pack(side='left', padx=5, pady=5)
+
+        start_analyses_index_entry = tk.Entry(first_bottom_frame, width=8)
+        start_analyses_index_entry.pack(side='left', padx=5, pady=5)
+
+        end_label = tk.Label(first_bottom_frame, text="Ende:")
+        end_label.pack(side='left', padx=5, pady=5)
+
+        end_analyses_index_entry = tk.Entry(first_bottom_frame, width=8)
+        end_analyses_index_entry.pack(side='left', padx=5, pady=5)
+
+        confirm_button = tk.Button(second_bottom_frame, text="Bestätigen", command=lambda: close_window())
+        confirm_button.pack(side='left', padx=5, pady=5)
+
+        cancel_button = tk.Button(second_bottom_frame, text="Abbrechen", command=lambda: input_window.destroy())
+        cancel_button.pack(side='left', padx=5, pady=5)
+
+        input_window.lift(self)
+        input_window.after(100, lambda: input_window.lift(self))
 
     # Funktion aktualisiert die Information für validen Druckbereich und Dauer
     def list_info_text(self):
@@ -533,6 +592,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.interval_entry.config(state="normal")
         self.thirty_sec_interval_button.config(state="normal")
         self.sixty_sec_interval_button.config(state="normal")
+        self.new_breath_area_button.config(state="normal")
         self.invalid_breath_button.config(state="normal")
         self.export_button.config(state="normal")
 
