@@ -1,0 +1,1 @@
+# __init__.py damit das Verzeichnis project_module als Paket erkannt wird (Verzeichnis wird in ein Paket umgewandelt)
