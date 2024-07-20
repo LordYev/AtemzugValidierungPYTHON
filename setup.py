@@ -4,9 +4,6 @@ from setuptools import setup, find_packages
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
-with open("README.md", "r", encoding="utf-8") as f:
-    long_description = f.read()
-
 setup(
     name="AtemzugValidierung",
     version="1.0",
@@ -19,7 +16,7 @@ setup(
     },
     author="Yevgeniy Gennadijovic Palamarchuk",
     description="Programm zum validieren einzelner Atemzüge",
-    long_description=long_description,
+    long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     python_requires='>=3.6'
 )
