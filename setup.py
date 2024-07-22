@@ -11,7 +11,7 @@ setup(
     install_requires=requirements,
     entry_points={
         'console_scripts': [
-            'run_azv_main=project_module.main:main',
+            'runazv=project_module.main:main',
         ],
     },
     author="Yevgeniy Gennadijovic Palamarchuk",
