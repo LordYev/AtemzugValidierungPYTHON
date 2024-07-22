@@ -91,7 +91,7 @@ runazv
 Nur Ordner importieren, nicht die EDF Dateien einzeln.
 3. Pfad wird im Anzeigefeld (2) angezeigt und Plot (3) wird erzeugt.
 
-### intervall anzeigen
+### Intervall anzeigen
 1. Gewünschten Startpunkt ins Eingabefeld (4) eingeben
 2. Bestätigen mit Button "Intervall anzeigen" (5) oder ENTER-Taste
 3. Im Plot-Fenster (3) wird ein Bereich von 30 Sekunden, beginnend vom Startpunkt geplottet
