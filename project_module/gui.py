@@ -1,8 +1,8 @@
 import tkinter as tk  # tkinter wird zum Bau der GUI verwendet
 from tkinter import ttk # ermöglicht den Bau des Treeview (Listenbereich mit den Atemzügen)
 from tkinter import filedialog  # filedialog = Modul aus tkinter um Dateien auswählen zu können
-from .logic import AtemzugValidierungLogic
-from .breath import AtemzugValidierungBreaths
+from logic import AtemzugValidierungLogic
+from breath import AtemzugValidierungBreaths
 import os
 import csv
 

@@ -1,4 +1,4 @@
-from .gui import AtemzugValidierungGUI
+from gui import AtemzugValidierungGUI
 
 
 def main():

@@ -64,3 +64,22 @@ Sie können das Programm mit folgendem Befehl in der Konsole starten:
 ```bash
 runazv
 ```
+
+### Benutzeranleitung
+![GUI-Elemente](images/gui_elements.png)
+Gui-Elemente
+1. Button zum EDF Import
+2. Anzeigefeld mit Dateipfad
+3. Plot
+4. Eingabefeld Intervall-Start
+5. Button zum Anzeigen des Intervalls
+6. Eingabefeld Intervalldauer
+7. Button zum Speichern der Intervalldauer
+8. Buttons zum Navigieren ("<<, >>" Fast-Validation, "<, >" Navigation vorwärts & rückwärts)
+9. Buttons zum Festlegen einer standard Intervalldauer von 30 oder 60 Sekunden
+10. Button zum Anzeigen der gesamten Beatmungsdauer
+11. Button zum Ermitteln des Beatmungsbereiches
+12. Liste mit Atemzügen
+13. Button markiert ausgewählten Atemzug als ungültig
+14. Infobereich: Gibt validen Druckbereich und Dauer eines Atemzuges an
+15. Button zum Exportieren im CSV-Format
