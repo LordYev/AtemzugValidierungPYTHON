@@ -33,7 +33,7 @@ pip3 --version
 ```
 Wenn pip vorhanden ist, dann wird die entsprechende Version ausgegeben.
 
-5. In Konsole zum Verzeichnis navigieren, in dem die setup.py Datei liegt.
+5. In Konsole zum Verzeichnis navigieren, in dem die *setup.py* Datei liegt.
 Zur Navigation den Befehl "cd" benutzen.
 ```bash
 #unter Windows
@@ -44,7 +44,7 @@ cd /Users/Benutzername/Pfad/zum/Verzeichnis/AtemzugValidierungPYTHON-master
 ```
 
 6. Mit dem Befehl "dir" (unter Windows) oder "ls" (unter Mac) können Sie prüfen, ob Sie sich in dem Verzeichnis mit der
-setup.py Datei befinden. Der Befehl listet alle Dateien im Verzeichnis auf.
+*setup.py* Datei befinden. Der Befehl listet alle Dateien im Verzeichnis auf.
 ```bash
 #unter Windows
 dir
