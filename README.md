@@ -1,4 +1,4 @@
-### Installation
+# Installation
 1. Dateien aus GitHub herunterladen und in gewünschtem Verzeichnis ablegen
 
 2. Konsole öffnen
@@ -65,9 +65,9 @@ Sie können das Programm mit folgendem Befehl in der Konsole starten:
 runazv
 ```
 
-### Benutzeranleitung
+# Benutzeranleitung
+## GUI-Elemente 
 ![GUI-Elemente](images/gui_elements.png)
-Gui-Elemente
 1. Button zum EDF Import
 2. Anzeigefeld mit Dateipfad
 3. Plot
@@ -83,3 +83,68 @@ Gui-Elemente
 13. Button markiert ausgewählten Atemzug als ungültig
 14. Infobereich: Gibt validen Druckbereich und Dauer eines Atemzuges an
 15. Button zum Exportieren im CSV-Format
+
+## Bedienung
+### EDF Datei importieren
+1. Auf Button "EDF Ordner auswählen" (1) klicken.
+2. Ordner auswählen, in dem sich beide EDF Dateien (mask.edf & device.edf) befinden.
+Nur Ordner importieren, nicht die EDF Dateien einzeln.
+3. Pfad wird im Anzeigefeld (2) angezeigt und Plot (3) wird erzeugt.
+
+### intervall anzeigen
+1. Gewünschten Startpunkt ins Eingabefeld (4) eingeben
+2. Bestätigen mit Button "Intervall anzeigen" (5) oder ENTER-Taste
+3. Im Plot-Fenster (3) wird ein Bereich von 30 Sekunden, beginnend vom Startpunkt geplottet
+
+### Intervalldauer festlegen 
+Die Intervalldauer kann angepasst werden. Standardmäßig sind 30 Sekunden eingestellt.
+1. Gewünschte Intervalldauer ins Eingabefeld (6) eingeben
+2. Bestätigen mit Button "Intervall speichern" (7) oder ENTER-Taste
+3. Auf Button "Intervall anzeigen" (4) klicken, damit neue Intervalldauer angezeigt wird. 
+(ACHTUNG) Plot beginnt wieder an festgelegtem Startpunkt
+4. Alternativ können 30 Sekunden oder 60 Sekunden mit den beiden Buttons (9) festgelegt werden.
+
+### Navigation im Plot
+Navigationsbuttons (8) werden erst freigeschaltet, sobald ein Intervall angezeigt wird.
+1. Mit den Buttons "<" und ">" können Sie sich in dem Plot vorwärts und rückwärts bewegen.
+2. Die Buttons "<<" und ">>" gehören zur Fast-Validation.
+Hiermit springen Sie zum nächsten Atemzug mit einer Anomalie
+
+### Gesamten Plot wieder anzeigen
+1. Durch Klicken auf den Button "Gesamten Graphen anzeigen" (10) 
+wird der gesamte Datensatz wieder geplottet
+
+### Neue Erfassung des Beatmungsbereiches
+Sollte der Beatmungsbereich nicht stimmen, so können Sie diesen manuell festlegen.
+1. Auf Button "Beatmungsbereich neu berechnen" klicken
+2. Es erscheint ein neues Fenster. Start- und Endzeitpunkt,
+zwischen denen sich die Beatmung befindet, eingeben und auf Button "Bestätigen" klicken
+3. Atemzugliste (12) wird neu befüllt
+
+### Atemzüge kommentieren
+Atemzüge, die die Bedingungen (14) nicht erfüllen, werden als ANOMALIEN (Status = 3) markiert. 
+Wenn Sie einen Atemzug kommentieren möchten, dann können Sie folgendermaßen vorgehen:
+1. Doppelklick in Spalte "Kommentar" in der Atemzugliste (12) 
+2. Datensatz kommentieren
+3. Mit ENTER-Taste bestätigen
+4. Spalte "Status" ändert den Status zu "2"
+5. Status des Atemzuges kann zu "1" geändert werden, 
+durch leeren des Kommentar-Feldes oder durch Eingabe von "-"
+
+### Atemzüge als nicht valide markieren
+Wenn ein Atemzug nicht relevant ist, dann kann dieser als nicht-valide markiert werden.
+1. Datensatz in Atemzugliste (12) auswählen
+2. Auf Button "kein Atemzug" (13) klicken
+3. Status des ausgewählten Datensatzes wird zu "0" geändert
+und Kommentar "kein Atemzug!" eingefügt
+
+### Atemzugliste exportieren
+Wenn die Bewertung der Atemzüge fertig ist, 
+dann kann die Liste im CSV-Format exportiert werden.
+1. Auf Button "Liste als .csv exportieren" (15) klicken
+2. Verzeichnis zum Ablegen der CSV-Dateien auswählen und bestätigen
+3. Es werden vier Dateien exportiert
+   - full_data.csv (Komplette Liste)
+   - invalid_data.csv (Nicht valide Daten)
+   - valid_data.csv (Valide Daten)
+   - commented_data.csv (Kommentierte Daten)
