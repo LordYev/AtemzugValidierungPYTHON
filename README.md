@@ -77,7 +77,7 @@ runazv
 6. Eingabefeld Intervalldauer
 7. Button zum Speichern der Intervalldauer
 8. Buttons zum Navigieren ("<<, >>" Fast-Validation, "<, >" Navigation vorwärts & rückwärts)
-9. Buttons zum Festlegen einer standard Intervalldauer von 30 oder 60 Sekunden
+9. Buttons zum Festlegen einer Standard Intervalldauer von 30 oder 60 Sekunden
 10. Button zum Anzeigen der gesamten Beatmungsdauer
 11. Button zum Ermitteln des Beatmungsbereiches
 12. Liste mit Atemzügen
