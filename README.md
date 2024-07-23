@@ -130,7 +130,7 @@ Wenn Sie einen Atemzug kommentieren möchten, dann können Sie folgendermaßen v
 3. Mit ENTER-Taste bestätigen
 4. Spalte "Status" ändert den Status zu "2"
 5. Status des Atemzuges kann zu "1" geändert werden, 
-durch leeren des Kommentar-Feldes oder durch Eingabe von "-"
+durch Leeren des Kommentar-Feldes oder durch Eingabe von "-"
 
 ### Atemzüge als nicht valide markieren
 Wenn ein Atemzug nicht relevant ist, dann kann dieser als nicht-valide markiert werden.
