@@ -278,8 +278,8 @@ class AtemzugValidierungGUI(tk.Tk):
         limit_info_label = tk.Label(self, text="Valider Druckbereich:\nValide Dauer:", justify="left")
         limit_info_label.grid(row=6, column=1, columnspan=10, padx=5, pady=5, sticky="w")
 
-        values_label = tk.Label(self, text=f"min {self.breath.min_pressure:.2f}mbar - max {self.breath.max_pressure:.2f}mbar\n"
-                                           f"min {self.breath.min_duration:.2f}sek - max {self.breath.max_duration:.2f}sek", justify="left")
+        values_label = tk.Label(self, text=f"min {self.breath.min_pressure:.2f}mbar - max {self.breath.max_pressure:.2f}mbar     \n"
+                                           f"min {self.breath.min_duration:.2f}sek - max {self.breath.max_duration:.2f}sek     ", justify="left")
         values_label.grid(row=6, column=1, columnspan=10, padx=150, pady=5, sticky="w")
 
     # Funktion kopiert nur valide Daten in neue Liste
