@@ -20,7 +20,8 @@ python3 --version
 Wenn Python vorhanden ist, dann wird die entsprechende Version ausgegeben. 
 Sollte Python nicht erkannt werden, dann können Sie unter [python.org](https://www.python.org)
 die neueste Version von Python herunterladen und installieren.
-Nach erfolgreicher Installation können Sie durch Eingabe des oben aufgeführten
+<u>(ACHTUNG) Bei der Installation von Python bitte das Kästchen "Add .exe to path" ankreuzen!</u>
+Nach erfolgreicher Installation bitte Konsole neu öffnen und durch Eingabe des oben aufgeführten
 Befehls prüfen ob Python erfolgreich installiert wurde.
 
 4. Prüfen ob pip installiert ist. Dies sollte automatisch mit Python installiert werden.
