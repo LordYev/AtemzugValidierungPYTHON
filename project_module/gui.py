@@ -40,6 +40,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.sixty_sec_interval_button = None
         self.invalid_breath_button = None
         self.export_button = None
+        self.values_label = None
 
 
         # Folgend werden GUI Elemente gebaut
@@ -278,9 +279,13 @@ class AtemzugValidierungGUI(tk.Tk):
         limit_info_label = tk.Label(self, text="Valider Druckbereich:\nValide Dauer:", justify="left")
         limit_info_label.grid(row=6, column=1, columnspan=10, padx=5, pady=5, sticky="w")
 
-        values_label = tk.Label(self, text=f"min {self.breath.min_pressure:.2f}mbar - max {self.breath.max_pressure:.2f}mbar     \n"
-                                           f"min {self.breath.min_duration:.2f}sek - max {self.breath.max_duration:.2f}sek     ", justify="left")
-        values_label.grid(row=6, column=1, columnspan=10, padx=150, pady=5, sticky="w")
+        # entfernt das alte Label
+        if self.values_label is not None:
+            self.values_label.destroy()
+
+        self.values_label = tk.Label(self, text=f"min {self.breath.min_pressure:.2f}mbar - max {self.breath.max_pressure:.2f}mbar\n"
+                                           f"min {self.breath.min_duration:.2f}sek - max {self.breath.max_duration:.2f}sek", justify="left")
+        self.values_label.grid(row=6, column=1, columnspan=10, padx=150, pady=5, sticky="w")
 
     # Funktion kopiert nur valide Daten in neue Liste
     def get_valid_data(self):
@@ -468,15 +473,17 @@ class AtemzugValidierungGUI(tk.Tk):
     # Zusätzlich werden die Buttons backwards_button & forwards_button freigegeben
     def set_starting_point(self):
         try:
-            self.interval_is_showen = True
-            self.backwards_button.config(state="normal")
-            self.forwards_button.config(state="normal")
-            self.fast_backwards_button.config(state="normal")
-            self.fast_forwards_button.config(state="normal")
-            self.starting_point = self.starting_point_entry.get()
-            self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.forward, self.backward, self.fast_backward,
-                                          self.fast_forward, self.breath_start, self.breath_end)
-            self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
+            # legt den Beginn des Intervalls nur fest, wenn Eingabefeld gefüllt ist
+            if self.starting_point_entry.get() != "":
+                self.interval_is_showen = True
+                self.backwards_button.config(state="normal")
+                self.forwards_button.config(state="normal")
+                self.fast_backwards_button.config(state="normal")
+                self.fast_forwards_button.config(state="normal")
+                self.starting_point = self.starting_point_entry.get()
+                self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.forward, self.backward, self.fast_backward,
+                                              self.fast_forward, self.breath_start, self.breath_end)
+                self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
 
         except Exception as error_code:
             print(f"\033[31m ERROR \033[33m Fehler beim Festlegen eines Startpunktes: \033[93m {error_code} \033[0m")
@@ -559,15 +566,21 @@ class AtemzugValidierungGUI(tk.Tk):
 
     # Funktion um im Plot rückwärts zu navigieren
     def go_backwards(self):
-        self.backward = True
-        self.backwards_forwards_navigation()
-        self.backward = False
+        focus = self.focus_get()
+        # nur wenn ein Intervall angezeigt wird, kann man sich navigieren
+        if self.interval_is_showen and str(focus).startswith(".!entry") is False:
+            self.backward = True
+            self.backwards_forwards_navigation()
+            self.backward = False
 
     # Funktion um im Plot vorwärts zu navigieren
     def go_forwards(self):
-        self.forward = True
-        self.backwards_forwards_navigation()
-        self.forward = False
+        focus = self.focus_get()
+        # nur wenn ein Intervall angezeigt wird, kann man sich navigieren
+        if self.interval_is_showen and str(focus).startswith(".!entry") is False:
+            self.forward = True
+            self.backwards_forwards_navigation()
+            self.forward = False
 
     # Funktion um direkt zur nächsten Anomalie zu springen
     def go_fast_backwards(self):
