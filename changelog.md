@@ -1,13 +1,13 @@
 # Version 1.0.1 - 25.07.2024
-- Info Label mit Grenzwerten angepasst:
+1. Info Label mit Grenzwerten angepasst:
     - Altes Label wird gelöscht bevor ein neues erzeugt wird (keine Überlappung mehr)
   
-- Intervall plotten
+2. Intervall plotten
     - Intervall wird jetzt nur geplottet, 
   wenn das Eingabefeld gefüllt ist. 
   Kein Fehler mehr, wenn Eingabefeld leer ist.
 
-- Navigation vorwärts & rückwärts
+3. Navigation vorwärts & rückwärts
     - Die Navigation mit den Pfeiltasten funktioniert jetzt nur, 
   wenn man sich in einem Intervall befindet. 
   Wenn der gesamte Datensatz angezeigt wird, passiert nichts mehr -> 
