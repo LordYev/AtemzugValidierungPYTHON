@@ -83,7 +83,6 @@ class AtemzugValidierungGUI(tk.Tk):
         # Ersetzt das Klicken auf den interval_button durch einen Klick auf die Enter Taste. Button ist weiterhin aktiv.
         def trigger_interval_button(event):
             self.set_starting_point()
-            self.focus()
             # Leert das Eingabefeld (NACHFARGEN OB GEBRAUCHT WIRD) - auch in Zeile 65
             '''self.starting_point_entry.delete(0, tk.END)'''
         self.starting_point_entry.bind("<Return>", trigger_interval_button)
@@ -139,8 +138,12 @@ class AtemzugValidierungGUI(tk.Tk):
 
         def set_interval():
             try:
-                interval = self.interval_entry.get()
-                self.logic.set_interval(float(interval))
+                self.focus()
+                # speichert Intervalldauer nur, wenn Eingabefeld gefüllt ist
+                if self.interval_entry.get() != "":
+                    interval = self.interval_entry.get()
+                    self.logic.set_interval(float(interval))
+
             except Exception as error_code:
                 print(f"\033[31m ERROR \033[33m Fehler beim Festlegen eines Intervalls: \033[93m {error_code} \033[0m")
                 print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / Funktion: \033[93m set_interval() \033[0m")
@@ -154,7 +157,6 @@ class AtemzugValidierungGUI(tk.Tk):
         # Ersetzt das Klicken auf den save_interval_button durch einen Klick auf die Enter Taste. Button ist weiterhin aktiv.
         def trigger_save_interval_button(event):
             set_interval()
-            self.focus()
         self.interval_entry.bind("<Return>", trigger_save_interval_button)
 
         def trigger_empty_set_interval(value):
@@ -473,6 +475,7 @@ class AtemzugValidierungGUI(tk.Tk):
     # Zusätzlich werden die Buttons backwards_button & forwards_button freigegeben
     def set_starting_point(self):
         try:
+            self.focus()
             # legt den Beginn des Intervalls nur fest, wenn Eingabefeld gefüllt ist
             if self.starting_point_entry.get() != "":
                 self.interval_is_showen = True

@@ -1,4 +1,4 @@
-# Version 1.0.1 - 25.07.2024
+# Version 1.0.2 - 26.07.2024
 
 
 # Installation

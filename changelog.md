@@ -1,3 +1,9 @@
+# Version 1.0.2 - 26.07.2024
+1. Fokus wird von Eingabefeldern durch Klicken auf Buttons "Intervall anzeigen" und "Intervall speichern" entfernt
+   - Navigation mit den buttons funktioniert direkt nach Bestätigung der Eingaben
+
+2. Eingabefeld für Intervalldauer kann auch leer gelassen und bestätigt werden. Keine Aktion wird ausgeführt und kein Fehler generiert.
+
 # Version 1.0.1 - 25.07.2024
 1. Info Label mit Grenzwerten angepasst:
     - Altes Label wird gelöscht bevor ein neues erzeugt wird (keine Überlappung mehr)
