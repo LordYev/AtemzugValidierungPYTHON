@@ -80,6 +80,7 @@ pip install --upgrade git+https://github.com/LordYev/AtemzugValidierungPYTHON
 # Benutzeranleitung
 ## GUI-Elemente 
 ![GUI-Elemente](images/gui_elements.png)
+![GUI-Elemente](images/extern_window.png)
 1. Button zum EDF Import
 2. Anzeigefeld mit Dateipfad
 3. Plot
@@ -90,11 +91,12 @@ pip install --upgrade git+https://github.com/LordYev/AtemzugValidierungPYTHON
 8. Buttons zum Navigieren ("<<, >>" Fast-Validation, "<, >" Navigation vorwärts & rückwärts)
 9. Buttons zum Festlegen einer Standard Intervalldauer von 30 oder 60 Sekunden
 10. Button zum Anzeigen der gesamten Beatmungsdauer
-11. Button zum Ermitteln des Beatmungsbereiches
+11. Button zum manuellen Ermitteln des Beatmungsbereiches
 12. Liste mit Atemzügen
 13. Button markiert ausgewählten Atemzug als ungültig
 14. Infobereich: Gibt validen Druckbereich und Dauer eines Atemzuges an
 15. Button zum Exportieren im CSV-Format
+16. Fenster zur Ermittlung des Beatmungsbereiches
 
 ## Bedienung
 ### EDF Datei importieren
@@ -128,9 +130,9 @@ wird der gesamte Datensatz wieder geplottet
 
 ### Neue Erfassung des Beatmungsbereiches
 Sollte der Beatmungsbereich nicht stimmen, so können Sie diesen manuell festlegen.
-1. Auf Button "Beatmungsbereich neu berechnen" klicken
-2. Es erscheint ein neues Fenster. Start- und Endzeitpunkt,
-zwischen denen sich die Beatmung befindet, eingeben und auf Button "Bestätigen" klicken
+1. Auf Button "Beatmungsbereich neu berechnen" (11) klicken
+2. Es erscheint ein neues Fenster (16). Startzeitpunkt vor und Endzeitpunkt nach
+der Beatmung eingeben und auf Button "Bestätigen" klicken
 3. Atemzugliste (12) wird neu befüllt
 
 ### Atemzüge kommentieren
