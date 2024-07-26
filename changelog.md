@@ -4,6 +4,13 @@
 
 2. Eingabefeld für Intervalldauer kann auch leer gelassen und bestätigt werden. Keine Aktion wird ausgeführt und kein Fehler generiert.
 
+3. README angepasst.
+   - Sektion zum Aktualisieren des Projekts ohne eine vollständige Installation eingefügt.
+   - Projekt kann mit folgendem Befehl aktualisiert werden:
+   ```bash
+   pip install --upgrade git+https://github.com/LordYev/AtemzugValidierungPYTHON
+   ```
+
 # Version 1.0.1 - 25.07.2024
 1. Info Label mit Grenzwerten angepasst:
     - Altes Label wird gelöscht bevor ein neues erzeugt wird (keine Überlappung mehr)

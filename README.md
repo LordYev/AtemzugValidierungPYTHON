@@ -69,6 +69,14 @@ Sie können das Programm mit folgendem Befehl in der Konsole starten:
 runazv
 ```
 
+# Projekt aktualisieren
+Um das Projekt zu aktualisieren und auf eine neue Version zu bringen
+muss man nicht die komplette Installation erneut durchführen.
+Dazu reicht der folgende Befehl in der Konsole:
+```bash
+pip install --upgrade git+https://github.com/LordYev/AtemzugValidierungPYTHON
+```
+
 # Benutzeranleitung
 ## GUI-Elemente 
 ![GUI-Elemente](images/gui_elements.png)
