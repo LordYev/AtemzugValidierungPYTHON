@@ -1,3 +1,7 @@
+# Version 1.0.3 - 27.07.2024
+1. GUI für Windows angepasst
+   - GUI Elemente werden auf Windows Systemen speziell angepasst
+
 # Version 1.0.2 - 26.07.2024
 1. Fokus wird von Eingabefeldern durch Klicken auf Buttons "Intervall anzeigen" und "Intervall speichern" entfernt
    - Navigation mit den buttons funktioniert direkt nach Bestätigung der Eingaben
