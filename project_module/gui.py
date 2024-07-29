@@ -44,7 +44,6 @@ class AtemzugValidierungGUI(tk.Tk):
         self.os_name = os.name
         self.os_windows = False
 
-
         # ermittelt, ob das Betriebssystem Windows ist
         if self.os_name == "nt":
             self.os_windows = True
@@ -65,6 +64,56 @@ class AtemzugValidierungGUI(tk.Tk):
 
         self.gui_edf_plot_area()
         self.gui_list_area()
+
+    # Funktion zum Zurücksetzen der wichtigsten Parameter
+    def all_parameters_set_back(self):
+        # Parameter der Klasse AtemzugValidierungGUI
+        self.mask_edf_path = None
+        self.device_edf_path = None
+        self.starting_point = None
+        self.breath_start = None
+        self.breath_end = None
+        self.selected_breath_index = None
+        self.interval_is_showen = False
+
+        # Parameter der Klasse AtemzugValidierungLogic
+        self.logic.interval = 30.0
+        self.logic.starting_point = 0.0
+        self.logic.duration_to_next_anomaly = 0
+        self.logic.duration_to_previous_anomaly = 0
+        self.logic.raw_mask_edf_data = None
+        self.logic.raw_device_edf_data = None
+        self.logic.mask_edf_meta_data = None
+        self.logic.mask_edf_data = None
+        self.logic.mask_edf_times = None
+        self.logic.duration_mask = None
+        self.logic.device_edf_meta_data = None
+        self.logic.device_edf_data = None
+        self.logic.device_edf_times = None
+        self.logic.duration_device = None
+        self.logic.scale_factor = None
+        self.logic.time_difference_start = None
+        self.logic.time_difference_end = None
+        self.logic.pressure_median = None
+        self.logic.breath_search_start_point = None
+        self.logic.breath_search_end_point = None
+
+        # Parameter der Klasse AtemzugValidierungBreaths
+        self.breath.breath_list = None
+        self.breath.breath_list_valid_data = None
+        self.breath.breath_list_invalid_data = None
+        self.breath.breath_list_commented_data = None
+        self.breath.mask_edf_meta_data = None
+        self.breath.mask_edf_data = None
+        self.breath.pressure_median = None
+        self.breath.min_pressure = None
+        self.breath.max_pressure = None
+        self.breath.min_duration = None
+        self.breath.max_duration = None
+        self.breath.ventilation_start = None
+        self.breath.ventilation_end = None
+        self.breath.start_analyses_index = 0.0
+        self.breath.end_analyses_index = 0.0
 
     # Funktion zum Testen auf was der Fokus liegt
     '''def check_focus(self):
@@ -274,143 +323,59 @@ class AtemzugValidierungGUI(tk.Tk):
         # führt beim Doppelklick die Funktion on_breath_double_click aus
         self.breath_list_area.bind("<Double-1>", self.on_breath_double_click)
 
-    # Funktion ermöglicht die Festlegung eines Bereiches, in dem die Beatmung ermittelt werden soll
-    def set_new_breath_area(self):
-        # Neues Fenster
-        input_window = tk.Toplevel(master=self)
-        input_window.geometry("300x150")
-        input_window.resizable(False, False)
-        top_frame = tk.Frame(input_window)
-        top_frame.pack(side="top")
-        bottom_frame = tk.Frame(input_window)
-        bottom_frame.pack(side="bottom")
-        first_bottom_frame = tk.Frame(bottom_frame)
-        first_bottom_frame.pack(side="top")
-        second_bottom_frame = tk.Frame(bottom_frame)
-        second_bottom_frame.pack(side="bottom")
+    # Funktion um einen festen Graphen wieder zugeben
+    def update_canvas(self):
+        canvas = self.logic.canvas.get_tk_widget()
+        canvas.grid(row=2, column=0, columnspan=10, padx=5, pady=5, sticky='w')
 
-        # Funktion zum Abschließen des Vorgangs im Fenster
-        def close_window():
-            try:
-                # Eingabewerte werden übergeben
-                self.logic.breath_search_start_point = start_analyses_index_entry.get()
-                self.logic.breath_search_end_point = end_analyses_index_entry.get()
+    # Funktion zum Auswählen eines Ordners mit zwei EDF-Dateien (mask.edf & device.edf)
+    def load_edf_files(self, folder_path_text):
+        folder_path = filedialog.askdirectory()
+        try:
+            if folder_path:
+                # setzt alle Parameter zurück, damit diese die neue Beatmungsdatei nicht beeinflussen
+                self.all_parameters_set_back()
+
+                folder_path_text.delete(1.0, tk.END)
+                folder_path_text.insert(tk.END, folder_path)
+                mask_edf_file_path = None
+                device_edf_file_path = None
+                for file_name in os.listdir(folder_path):
+                    if file_name.endswith("mask.edf"):
+                        mask_edf_file_path = os.path.join(folder_path, file_name)
+                        self.mask_edf_path = mask_edf_file_path
+                    elif file_name.endswith("device.edf"):
+                        device_edf_file_path = os.path.join(folder_path, file_name)
+                        self.device_edf_path = device_edf_file_path
+                # Raw_Objekt soll wieder auf None gesetzt werden, damit eine neue EDF-Datei geladen werden kann
+                self.logic.raw_mask_edf_data = None
+                self.logic.raw_device_edf_data = None
+
+                self.logic.read_edf_file(mask_edf_file_path, device_edf_file_path)
+                self.update_canvas()
+
+                # Übergibt Daten aus logic an breath
+                # Aus breath kann man nicht direkt z.B. auf Daten in mask_edf_meta_data in logic zugreifen -> None
+                self.breath.mask_edf_meta_data = self.logic.mask_edf_meta_data
+                self.breath.mask_edf_data = self.logic.mask_edf_data
 
                 self.determine_breaths()
 
-                # Fenster wird wieder geschlossen
-                input_window.destroy()
+                # Sperrt beide buttons
+                # hier werden die Buttons erneut gesperrt, da diese Funktion zum wiederholten Plotten verwendet wird
+                self.backwards_button.config(state="disabled")
+                self.forwards_button.config(state="disabled")
+                self.fast_backwards_button.config(state="disabled")
+                self.fast_forwards_button.config(state="disabled")
 
-            except Exception as error_code:
-                print(f"\033[31m ERROR \033[33m Fehler bei Eingabe von Zeiten: \033[93m {error_code} \033[0m")
-                print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / "
-                      f"Funktion: \033[93m close_window() \033[0m")
+                # Leert die Eingabefelder
+                self.starting_point_entry.delete(0, tk.END)
+                self.interval_entry.delete(0, tk.END)
 
-        label = tk.Label(top_frame, text="Bitte geben Sie zwei Zeitpunkte an. "
-                                         "\n\n Startzeitpunkt muss VOR der Beatmung liegen! \n"
-                                         "Endzeitpunk muss NACH der Beatmung liegen!")
-        label.pack(padx=5, pady=5)
-
-        start_label = tk.Label(first_bottom_frame, text="Start:")
-        start_label.pack(side='left', padx=5, pady=5)
-
-        start_analyses_index_entry = tk.Entry(first_bottom_frame, width=8)
-        start_analyses_index_entry.pack(side='left', padx=5, pady=5)
-
-        end_label = tk.Label(first_bottom_frame, text="Ende:")
-        end_label.pack(side='left', padx=5, pady=5)
-
-        end_analyses_index_entry = tk.Entry(first_bottom_frame, width=8)
-        end_analyses_index_entry.pack(side='left', padx=5, pady=5)
-
-        confirm_button = tk.Button(second_bottom_frame, text="Bestätigen", command=lambda: close_window())
-        confirm_button.pack(side='left', padx=5, pady=5)
-
-        cancel_button = tk.Button(second_bottom_frame, text="Abbrechen", command=lambda: input_window.destroy())
-        cancel_button.pack(side='left', padx=5, pady=5)
-
-        input_window.lift(self)
-        input_window.after(100, lambda: input_window.lift(self))
-
-    # Funktion aktualisiert die Information für validen Druckbereich und Dauer
-    def list_info_text(self):
-        limit_info_label = tk.Label(self, text="Valider Druckbereich:\nValide Dauer:", justify="left")
-        limit_info_label.grid(row=6, column=1, columnspan=10, padx=5, pady=5, sticky="w")
-
-        # entfernt das alte Label
-        if self.values_label is not None:
-            self.values_label.destroy()
-
-        self.values_label = tk.Label(self, text=f"min {self.breath.min_pressure:.2f}mbar - "
-                                                f"max {self.breath.max_pressure:.2f}mbar\n "
-                                                f"min {self.breath.min_duration:.2f}sek - "
-                                                f"max {self.breath.max_duration:.2f}sek", justify="left")
-        self.values_label.grid(row=6, column=1, columnspan=10, padx=150, pady=5, sticky="w")
-
-    # Funktion kopiert nur valide Daten in neue Liste
-    def get_valid_data(self):
-        breath_list_valid = []
-        for i in self.breath.breath_list:
-            if i[3] == 1 or i[3] == 2:
-                breath_list_valid.append(i)
-
-        return breath_list_valid
-
-    # Funktion kopiert nur invalide Daten in neue Liste
-    def get_invalid_data(self):
-        breath_list_invalid = []
-        for i in self.breath.breath_list:
-            if i[3] == 0:
-                breath_list_invalid.append(i)
-
-        return breath_list_invalid
-
-    # Funktion kopiert nur kommentierte Daten in neue Liste
-    def get_commented_data(self):
-        breath_list_commented = []
-        for i in self.breath.breath_list:
-            if i[3] == 2:
-                breath_list_commented.append(i)
-
-        return breath_list_commented
-
-    # Funktion erstellt CSV Datei
-    def export_to_csv(self, filename, data):
-        with open(filename, mode='w', newline='') as file:
-            writer = csv.writer(file, delimiter=";")
-            writer.writerow(self.column_headers)
-            for row in data:
-                writer.writerow(list(row))
-
-    # Funktion exportiert übergebene Listen in CSV Dateien
-    def export_list(self):
-        self.breath.breath_list_valid_data = self.get_valid_data()
-        self.breath.breath_list_invalid_data = self.get_invalid_data()
-        self.breath.breath_list_commented_data = self.get_commented_data()
-
-        # öffnet Dialogfenster, wo man den Speicherort auswählen kann
-        folder_path = filedialog.askdirectory(
-            title="Speicherort auswählen"
-        )
-
-        # wenn Speicherort ausgewählt wurde, werden alle Dateien dort abgelegt
-        if folder_path:
-            file_name = "full_data.csv"
-            full_path = os.path.join(folder_path, file_name)
-            self.export_to_csv(full_path, self.breath.breath_list)
-
-            file_name = "valid_data.csv"
-            full_path = os.path.join(folder_path, file_name)
-            self.export_to_csv(full_path, self.breath.breath_list_valid_data)
-
-            file_name = "invalid_data.csv"
-            full_path = os.path.join(folder_path, file_name)
-            self.export_to_csv(full_path, self.breath.breath_list_invalid_data)
-
-            file_name = "commented_data.csv"
-            full_path = os.path.join(folder_path, file_name)
-            self.export_to_csv(full_path, self.breath.breath_list_commented_data)
-
+        except Exception as error_code:
+            print(f"\033[31m ERROR \033[33m Fehler beim laden der EDF-Dateien: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / "
+                  f"Funktion: \033[93m load_edf_files() \033[0m")
 
     # Funktion, welche beim Auswählen eines Datensatzes ausgeführt werden soll
     def on_breath_selection(self, event):
@@ -504,6 +469,21 @@ class AtemzugValidierungGUI(tk.Tk):
             self.entry.bind("<Return>", on_entry_confirm)
             self.entry.bind("<FocusOut>", lambda event: self.entry.destroy())
 
+    # Funktion aktualisiert die Information für validen Druckbereich und Dauer
+    def list_info_text(self):
+        limit_info_label = tk.Label(self, text="Valider Druckbereich:\nValide Dauer:", justify="left")
+        limit_info_label.grid(row=6, column=1, columnspan=10, padx=5, pady=5, sticky="w")
+
+        # entfernt das alte Label
+        if self.values_label is not None:
+            self.values_label.destroy()
+
+        self.values_label = tk.Label(self, text=f"min {self.breath.min_pressure:.2f}mbar - "
+                                                f"max {self.breath.max_pressure:.2f}mbar\n "
+                                                f"min {self.breath.min_duration:.2f}sek - "
+                                                f"max {self.breath.max_duration:.2f}sek", justify="left")
+        self.values_label.grid(row=6, column=1, columnspan=10, padx=150, pady=5, sticky="w")
+
     # Funktion zum Befüllen der list_area
     def fill_list_area(self):
         self.list_info_text()
@@ -520,18 +500,64 @@ class AtemzugValidierungGUI(tk.Tk):
         for item in self.breath_list_area.get_children():
             self.breath_list_area.delete(item)
 
-    def set_data_to_invalid(self):
-        selected_item = self.breath_list_area.selection()[0]
-        actual_temp_data = list(self.breath_list_area.item(selected_item, "values"))
-        actual_temp_data[3] = 0
-        actual_temp_data[4] = "kein Atemzug!"
-        self.breath_list_area.item(selected_item, values=actual_temp_data)
+    def determine_breaths(self):
+        try:
+            # Übergabe der Zeitpunkte zwischen welchen die Atemzüge ermittelt werden
+            self.breath.start_analyses_index = self.logic.breath_search_start_point
+            self.breath.end_analyses_index = self.logic.breath_search_end_point
 
-        actual_data = list(self.breath.breath_list[self.selected_breath_index])
-        actual_data[3] = 0
-        actual_data[4] = "kein Atemzug!"
-        new_data = tuple(actual_data)
-        self.breath.breath_list[self.selected_breath_index] = new_data
+            # Atemzüge werden ermittelt und in Liste gespeichert
+            self.breath.breath_list = self.breath.get_breaths()
+            # Übergibt Grenzwert aus breath an logic
+            self.logic.pressure_median = self.breath.pressure_median
+
+            # Entsperrt Buttons
+            self.interval_button.config(state="normal")
+            self.save_interval_button.config(state="normal")
+            self.full_graph_button.config(state="normal")
+            self.starting_point_entry.config(state="normal")
+            self.interval_entry.config(state="normal")
+            self.thirty_sec_interval_button.config(state="normal")
+            self.sixty_sec_interval_button.config(state="normal")
+            self.new_breath_area_button.config(state="normal")
+            self.invalid_breath_button.config(state="normal")
+            self.export_button.config(state="normal")
+
+            self.clear_list_area()
+            self.fill_list_area()
+
+        except Exception as error_code:
+            print(f"\033[31m ERROR \033[33m Fehler beim Bestimmen der Atemzüge: \033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / "
+                  f"Funktion: \033[93m determine_breaths() \033[0m")
+
+    def determine_breaths_in_interval(self, interval_start, interval_duration):
+        try:
+            self.clear_list_area()
+            interval_end = int(interval_start) + int(interval_duration)
+
+            # Ermittlung des ersten Atemzuges im Intervall
+            first_breath_start = None
+            for i in self.breath.breath_list:
+                if i[1] >= int(interval_start):
+                    first_breath_start = i[0] - 1
+                    break
+
+            # Füllt die Liste mit den im Plot angezeigten Atemzügen
+            for i in self.breath.breath_list[first_breath_start:]:
+                if interval_end >= i[2]:
+                    value_start = f"{i[1]:.2f}"
+                    value_end = f"{i[2]:.2f}"
+
+                    self.breath_list_area.insert("", "end", values=(i[0], value_start, value_end, i[3], i[4]))
+                else:
+                    break
+
+        except Exception as error_code:
+            print(f"\033[31m ERROR \033[33m Fehler beim Bestimmen der Atemzüge im Intervall: "
+                  f"\033[93m {error_code} \033[0m")
+            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / "
+                  f"Funktion: \033[93m determine_breaths_in_interval() \033[0m")
 
     # Funktion um den Startpunkt des Intervalls in einer Variable abzuspeichern
     # Zusätzlich werden die Buttons backwards_button & forwards_button freigegeben
@@ -663,119 +689,6 @@ class AtemzugValidierungGUI(tk.Tk):
         self.fast_validation_backwards_forwards()
         self.fast_forward = False
 
-    # Funktion um einen festen Graphen wieder zugeben
-    def update_canvas(self):
-        canvas = self.logic.canvas.get_tk_widget()
-        canvas.grid(row=2, column=0, columnspan=10, padx=5, pady=5, sticky='w')
-
-    def determine_breaths(self):
-        try:
-            # Übergabe der Zeitpunkte zwischen welchen die Atemzüge ermittelt werden
-            self.breath.start_analyses_index = self.logic.breath_search_start_point
-            self.breath.end_analyses_index = self.logic.breath_search_end_point
-
-            # Atemzüge werden ermittelt und in Liste gespeichert
-            self.breath.breath_list = self.breath.get_breaths()
-            # Übergibt Grenzwert aus breath an logic
-            self.logic.pressure_median = self.breath.pressure_median
-
-            # Entsperrt Buttons
-            self.interval_button.config(state="normal")
-            self.save_interval_button.config(state="normal")
-            self.full_graph_button.config(state="normal")
-            self.starting_point_entry.config(state="normal")
-            self.interval_entry.config(state="normal")
-            self.thirty_sec_interval_button.config(state="normal")
-            self.sixty_sec_interval_button.config(state="normal")
-            self.new_breath_area_button.config(state="normal")
-            self.invalid_breath_button.config(state="normal")
-            self.export_button.config(state="normal")
-
-            self.clear_list_area()
-            self.fill_list_area()
-
-        except Exception as error_code:
-            print(f"\033[31m ERROR \033[33m Fehler beim Bestimmen der Atemzüge: \033[93m {error_code} \033[0m")
-            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / "
-                  f"Funktion: \033[93m determine_breaths() \033[0m")
-
-    def determine_breaths_in_interval(self, interval_start, interval_duration):
-        try:
-            self.clear_list_area()
-            interval_end = int(interval_start) + int(interval_duration)
-
-            # Ermittlung des ersten Atemzuges im Intervall
-            first_breath_start = None
-            for i in self.breath.breath_list:
-                if i[1] >= int(interval_start):
-                    first_breath_start = i[0] - 1
-                    break
-
-            # Füllt die Liste mit den im Plot angezeigten Atemzügen
-            for i in self.breath.breath_list[first_breath_start:]:
-                if interval_end >= i[2]:
-                    value_start = f"{i[1]:.2f}"
-                    value_end = f"{i[2]:.2f}"
-
-                    self.breath_list_area.insert("", "end", values=(i[0], value_start, value_end, i[3], i[4]))
-                else:
-                    break
-
-        except Exception as error_code:
-            print(f"\033[31m ERROR \033[33m Fehler beim Bestimmen der Atemzüge im Intervall: "
-                  f"\033[93m {error_code} \033[0m")
-            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / "
-                  f"Funktion: \033[93m determine_breaths_in_interval() \033[0m")
-
-    # Funktion zum Auswählen eines Ordners mit zwei EDF-Dateien (mask.edf & device.edf)
-    def load_edf_files(self, folder_path_text):
-        folder_path = filedialog.askdirectory()
-        try:
-            if folder_path:
-                # setzt alle Parameter zurück, damit diese die neue Beatmungsdatei nicht beeinflussen
-                self.all_parameters_set_back()
-
-                folder_path_text.delete(1.0, tk.END)
-                folder_path_text.insert(tk.END, folder_path)
-                mask_edf_file_path = None
-                device_edf_file_path = None
-                for file_name in os.listdir(folder_path):
-                    if file_name.endswith("mask.edf"):
-                        mask_edf_file_path = os.path.join(folder_path, file_name)
-                        self.mask_edf_path = mask_edf_file_path
-                    elif file_name.endswith("device.edf"):
-                        device_edf_file_path = os.path.join(folder_path, file_name)
-                        self.device_edf_path = device_edf_file_path
-                # Raw_Objekt soll wieder auf None gesetzt werden, damit eine neue EDF-Datei geladen werden kann
-                self.logic.raw_mask_edf_data = None
-                self.logic.raw_device_edf_data = None
-
-                self.logic.read_edf_file(mask_edf_file_path, device_edf_file_path)
-                self.update_canvas()
-
-                # Übergibt Daten aus logic an breath
-                # Aus breath kann man nicht direkt z.B. auf Daten in mask_edf_meta_data in logic zugreifen -> None
-                self.breath.mask_edf_meta_data = self.logic.mask_edf_meta_data
-                self.breath.mask_edf_data = self.logic.mask_edf_data
-
-                self.determine_breaths()
-
-                # Sperrt beide buttons
-                # hier werden die Buttons erneut gesperrt, da diese Funktion zum wiederholten Plotten verwendet wird
-                self.backwards_button.config(state="disabled")
-                self.forwards_button.config(state="disabled")
-                self.fast_backwards_button.config(state="disabled")
-                self.fast_forwards_button.config(state="disabled")
-
-                # Leert die Eingabefelder
-                self.starting_point_entry.delete(0, tk.END)
-                self.interval_entry.delete(0, tk.END)
-
-        except Exception as error_code:
-            print(f"\033[31m ERROR \033[33m Fehler beim laden der EDF-Dateien: \033[93m {error_code} \033[0m")
-            print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / "
-                  f"Funktion: \033[93m load_edf_files() \033[0m")
-
     def plot_back_edf_file(self, mask_edf_file_path, device_edf_file_path):
         try:
             self.interval_is_showen = False
@@ -805,52 +718,137 @@ class AtemzugValidierungGUI(tk.Tk):
             print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / "
                   f"Funktion: \033[93m plot_back_edf_file() \033[0m")
 
-    # Funktion zum Zurücksetzen der wichtigsten Parameter
-    def all_parameters_set_back(self):
-        # Parameter der Klasse AtemzugValidierungGUI
-        self.mask_edf_path = None
-        self.device_edf_path = None
-        self.starting_point = None
-        self.breath_start = None
-        self.breath_end = None
-        self.selected_breath_index = None
-        self.interval_is_showen = False
+    # Funktion ermöglicht die Festlegung eines Bereiches, in dem die Beatmung ermittelt werden soll
+    def set_new_breath_area(self):
+        # Neues Fenster
+        input_window = tk.Toplevel(master=self)
+        input_window.geometry("300x150")
+        input_window.resizable(False, False)
+        top_frame = tk.Frame(input_window)
+        top_frame.pack(side="top")
+        bottom_frame = tk.Frame(input_window)
+        bottom_frame.pack(side="bottom")
+        first_bottom_frame = tk.Frame(bottom_frame)
+        first_bottom_frame.pack(side="top")
+        second_bottom_frame = tk.Frame(bottom_frame)
+        second_bottom_frame.pack(side="bottom")
 
-        # Parameter der Klasse AtemzugValidierungLogic
-        self.logic.interval = 30.0
-        self.logic.starting_point = 0.0
-        self.logic.duration_to_next_anomaly = 0
-        self.logic.duration_to_previous_anomaly = 0
-        self.logic.raw_mask_edf_data = None
-        self.logic.raw_device_edf_data = None
-        self.logic.mask_edf_meta_data = None
-        self.logic.mask_edf_data = None
-        self.logic.mask_edf_times = None
-        self.logic.duration_mask = None
-        self.logic.device_edf_meta_data = None
-        self.logic.device_edf_data = None
-        self.logic.device_edf_times = None
-        self.logic.duration_device = None
-        self.logic.scale_factor = None
-        self.logic.time_difference_start = None
-        self.logic.time_difference_end = None
-        self.logic.pressure_median = None
-        self.logic.breath_search_start_point = None
-        self.logic.breath_search_end_point = None
+        # Funktion zum Abschließen des Vorgangs im Fenster
+        def close_window():
+            try:
+                # Eingabewerte werden übergeben
+                self.logic.breath_search_start_point = start_analyses_index_entry.get()
+                self.logic.breath_search_end_point = end_analyses_index_entry.get()
 
-        # Parameter der Klasse AtemzugValidierungBreaths
-        self.breath.breath_list = None
-        self.breath.breath_list_valid_data = None
-        self.breath.breath_list_invalid_data = None
-        self.breath.breath_list_commented_data = None
-        self.breath.mask_edf_meta_data = None
-        self.breath.mask_edf_data = None
-        self.breath.pressure_median = None
-        self.breath.min_pressure = None
-        self.breath.max_pressure = None
-        self.breath.min_duration = None
-        self.breath.max_duration = None
-        self.breath.ventilation_start = None
-        self.breath.ventilation_end = None
-        self.breath.start_analyses_index = 0.0
-        self.breath.end_analyses_index = 0.0
+                self.determine_breaths()
+
+                # Fenster wird wieder geschlossen
+                input_window.destroy()
+
+            except Exception as error_code:
+                print(f"\033[31m ERROR \033[33m Fehler bei Eingabe von Zeiten: \033[93m {error_code} \033[0m")
+                print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / "
+                      f"Funktion: \033[93m close_window() \033[0m")
+
+        label = tk.Label(top_frame, text="Bitte geben Sie zwei Zeitpunkte an. "
+                                         "\n\n Startzeitpunkt muss VOR der Beatmung liegen! \n"
+                                         "Endzeitpunk muss NACH der Beatmung liegen!")
+        label.pack(padx=5, pady=5)
+
+        start_label = tk.Label(first_bottom_frame, text="Start:")
+        start_label.pack(side='left', padx=5, pady=5)
+
+        start_analyses_index_entry = tk.Entry(first_bottom_frame, width=8)
+        start_analyses_index_entry.pack(side='left', padx=5, pady=5)
+
+        end_label = tk.Label(first_bottom_frame, text="Ende:")
+        end_label.pack(side='left', padx=5, pady=5)
+
+        end_analyses_index_entry = tk.Entry(first_bottom_frame, width=8)
+        end_analyses_index_entry.pack(side='left', padx=5, pady=5)
+
+        confirm_button = tk.Button(second_bottom_frame, text="Bestätigen", command=lambda: close_window())
+        confirm_button.pack(side='left', padx=5, pady=5)
+
+        cancel_button = tk.Button(second_bottom_frame, text="Abbrechen", command=lambda: input_window.destroy())
+        cancel_button.pack(side='left', padx=5, pady=5)
+
+        input_window.lift(self)
+        input_window.after(100, lambda: input_window.lift(self))
+
+    def set_data_to_invalid(self):
+        selected_item = self.breath_list_area.selection()[0]
+        actual_temp_data = list(self.breath_list_area.item(selected_item, "values"))
+        actual_temp_data[3] = 0
+        actual_temp_data[4] = "kein Atemzug!"
+        self.breath_list_area.item(selected_item, values=actual_temp_data)
+
+        actual_data = list(self.breath.breath_list[self.selected_breath_index])
+        actual_data[3] = 0
+        actual_data[4] = "kein Atemzug!"
+        new_data = tuple(actual_data)
+        self.breath.breath_list[self.selected_breath_index] = new_data
+
+    # Funktion kopiert nur valide Daten in neue Liste
+    def get_valid_data(self):
+        breath_list_valid = []
+        for i in self.breath.breath_list:
+            if i[3] == 1 or i[3] == 2:
+                breath_list_valid.append(i)
+
+        return breath_list_valid
+
+    # Funktion kopiert nur invalide Daten in neue Liste
+    def get_invalid_data(self):
+        breath_list_invalid = []
+        for i in self.breath.breath_list:
+            if i[3] == 0:
+                breath_list_invalid.append(i)
+
+        return breath_list_invalid
+
+    # Funktion kopiert nur kommentierte Daten in neue Liste
+    def get_commented_data(self):
+        breath_list_commented = []
+        for i in self.breath.breath_list:
+            if i[3] == 2:
+                breath_list_commented.append(i)
+
+        return breath_list_commented
+
+    # Funktion erstellt CSV Datei
+    def export_to_csv(self, filename, data):
+        with open(filename, mode='w', newline='') as file:
+            writer = csv.writer(file, delimiter=";")
+            writer.writerow(self.column_headers)
+            for row in data:
+                writer.writerow(list(row))
+
+    # Funktion exportiert übergebene Listen in CSV Dateien
+    def export_list(self):
+        self.breath.breath_list_valid_data = self.get_valid_data()
+        self.breath.breath_list_invalid_data = self.get_invalid_data()
+        self.breath.breath_list_commented_data = self.get_commented_data()
+
+        # öffnet Dialogfenster, wo man den Speicherort auswählen kann
+        folder_path = filedialog.askdirectory(
+            title="Speicherort auswählen"
+        )
+
+        # wenn Speicherort ausgewählt wurde, werden alle Dateien dort abgelegt
+        if folder_path:
+            file_name = "full_data.csv"
+            full_path = os.path.join(folder_path, file_name)
+            self.export_to_csv(full_path, self.breath.breath_list)
+
+            file_name = "valid_data.csv"
+            full_path = os.path.join(folder_path, file_name)
+            self.export_to_csv(full_path, self.breath.breath_list_valid_data)
+
+            file_name = "invalid_data.csv"
+            full_path = os.path.join(folder_path, file_name)
+            self.export_to_csv(full_path, self.breath.breath_list_invalid_data)
+
+            file_name = "commented_data.csv"
+            full_path = os.path.join(folder_path, file_name)
+            self.export_to_csv(full_path, self.breath.breath_list_commented_data)

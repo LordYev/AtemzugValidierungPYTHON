@@ -21,49 +21,6 @@ class AtemzugValidierungBreaths:
         self.start_analyses_index = 0.0
         self.end_analyses_index = 0.0
 
-    # Funktion zur Ermittlung der einzelnen Atemzüge
-    def get_breaths(self):
-        breaths = []
-        breathing = False
-        breath_start = None
-        breath_no = 1
-        value_status = 1
-        value_comment = "-"
-
-        # Start- und Endpunkt. Ab wo bis wo werden Atemzüge erfasst
-        start_index, end_index = self.get_ventilation_start_end()
-        # Schwellwert wird berechnet
-        self.pressure_median = self.get_pressure_median()
-
-        for i in range(start_index, end_index):
-            if self.mask_edf_data[0, i] >= self.pressure_median and self.mask_edf_data[0, i + 1] > self.pressure_median:
-                if not breathing:
-                    breathing = True
-                    breath_start = i / 100
-            elif breathing:
-                breath_end = i / 100
-                # Aufzeichnung von atemzügen, welche mindesten 0,2 Sek lang sind
-                if breath_end - breath_start >= 0.2:
-                    # setzt Status und Kommentar für alle Atemzüge in den ersten 5 Minuten fest
-                    if breath_start < ((start_index / 100) + 300):
-                        value_status = 0
-                        value_comment = "Atemzug befindet sich innerhalb der ersten 5 Minuten!"
-
-                    # setzt Status und Kommentar für alle Atemzüge in den letzten 5 Minuten fest
-                    if breath_start > ((end_index / 100) - 300):
-                        value_status = 0
-                        value_comment = "Atemzug befindet sich innerhalb der letzten 5 Minuten!"
-
-                    breaths.append((breath_no, breath_start, breath_end, value_status, value_comment))
-                    breath_no += 1
-                    value_status = 1
-                    value_comment = "-"
-                breathing = False
-
-        breath_list = self.mark_anomalie_data(breaths)
-
-        return breath_list
-
     # Funktion zum Ermitteln des maximalen Drucks eines Atemzuges
     def get_pressure_peak(self, start_index, end_index):
         # Star und Ende werden umgerechnet, da es Kommazahlen mit zwei Nachkommastellen sind
@@ -128,7 +85,8 @@ class AtemzugValidierungBreaths:
                     data[4] = f"ANOMALIE. max Druck: {pressure_peak_list[breath_index]:.2f}mbar"
                 elif duration_out_of_valid_area is True and pressure_out_of_valid_area is True:
                     data[3] = 3
-                    data[4] = f"ANOMALIE. Dauer: {breath_duration_list[breath_index]:.2f}sek, max Druck: {pressure_peak_list[breath_index]:.2f}mbar"
+                    data[
+                        4] = f"ANOMALIE. Dauer: {breath_duration_list[breath_index]:.2f}sek, max Druck: {pressure_peak_list[breath_index]:.2f}mbar"
 
             breath_index += 1
 
@@ -225,3 +183,46 @@ class AtemzugValidierungBreaths:
         pressure_median_limit = pressure_median + (0.6 * pressure_median)
 
         return pressure_median_limit
+
+    # Funktion zur Ermittlung der einzelnen Atemzüge
+    def get_breaths(self):
+        breaths = []
+        breathing = False
+        breath_start = None
+        breath_no = 1
+        value_status = 1
+        value_comment = "-"
+
+        # Start- und Endpunkt. Ab wo bis wo werden Atemzüge erfasst
+        start_index, end_index = self.get_ventilation_start_end()
+        # Schwellwert wird berechnet
+        self.pressure_median = self.get_pressure_median()
+
+        for i in range(start_index, end_index):
+            if self.mask_edf_data[0, i] >= self.pressure_median and self.mask_edf_data[0, i + 1] > self.pressure_median:
+                if not breathing:
+                    breathing = True
+                    breath_start = i / 100
+            elif breathing:
+                breath_end = i / 100
+                # Aufzeichnung von atemzügen, welche mindesten 0,2 Sek lang sind
+                if breath_end - breath_start >= 0.2:
+                    # setzt Status und Kommentar für alle Atemzüge in den ersten 5 Minuten fest
+                    if breath_start < ((start_index / 100) + 300):
+                        value_status = 0
+                        value_comment = "Atemzug befindet sich innerhalb der ersten 5 Minuten!"
+
+                    # setzt Status und Kommentar für alle Atemzüge in den letzten 5 Minuten fest
+                    if breath_start > ((end_index / 100) - 300):
+                        value_status = 0
+                        value_comment = "Atemzug befindet sich innerhalb der letzten 5 Minuten!"
+
+                    breaths.append((breath_no, breath_start, breath_end, value_status, value_comment))
+                    breath_no += 1
+                    value_status = 1
+                    value_comment = "-"
+                breathing = False
+
+        breath_list = self.mark_anomalie_data(breaths)
+
+        return breath_list

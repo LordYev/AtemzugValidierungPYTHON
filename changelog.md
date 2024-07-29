@@ -1,8 +1,11 @@
-# Version 1.0.3 - 27.07.2024
+# Version 1.3.1 - 29.07.2024
+1. Code Anpassungen (keine Funktionalen Änderungen)
+
+# Version 1.3 - 27.07.2024
 1. GUI für Windows angepasst
    - GUI Elemente werden auf Windows Systemen speziell angepasst
 
-# Version 1.0.2 - 26.07.2024
+# Version 1.2 - 26.07.2024
 1. Fokus wird von Eingabefeldern durch Klicken auf Buttons "Intervall anzeigen" und "Intervall speichern" entfernt
    - Navigation mit den buttons funktioniert direkt nach Bestätigung der Eingaben
 
@@ -16,7 +19,7 @@
    ```
    - Darstellung des Fensters zur erneuten Berechnung des Beatmungsbereiches eingefügt.
 
-# Version 1.0.1 - 25.07.2024
+# Version 1.1 - 25.07.2024
 1. Info Label mit Grenzwerten angepasst:
     - Altes Label wird gelöscht bevor ein neues erzeugt wird (keine Überlappung mehr)
   
