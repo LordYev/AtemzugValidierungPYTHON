@@ -108,10 +108,6 @@ class AtemzugValidierungLogic:
             # Aktualisiert das Plot Fenster
             plt.draw()
 
-            # Zeigt mir die Anzahl aktuell geöffneter Plots
-            """num_figures = len(plt.get_fignums())
-            print("Anzahl der geöffneten Figuren:", num_figures)"""
-
         except Exception as error_code:
             print(f"\033[31m ERROR \033[33m Fehler beim Plotten der Daten: \033[93m {error_code} \033[0m")
             print(f"\033[33m Klasse: \033[93m AtemzugValidierungLogic \033[33m / Funktion: \033[93m plot_edf_interval() \033[0m")
@@ -246,10 +242,6 @@ class AtemzugValidierungLogic:
         canvas = FigureCanvasTkAgg(fig)
         canvas.draw()
         self.canvas = canvas
-
-        # Zeigt mir die Anzahl aktuell geöffneter Plots
-        """num_figures = len(plt.get_fignums())
-        print("Anzahl der geöffneten Figuren:", num_figures)"""
 
     # Funktion um EDF-Datei zu einzulesen
     def read_edf_file(self, mask_edf_file_path, device_edf_file_path):

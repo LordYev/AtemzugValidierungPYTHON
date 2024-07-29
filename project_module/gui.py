@@ -1,5 +1,5 @@
 import tkinter as tk  # tkinter wird zum Bau der GUI verwendet
-from tkinter import ttk # ermöglicht den Bau des Treeview (Listenbereich mit den Atemzügen)
+from tkinter import ttk  # ermöglicht den Bau des Treeview (Listenbereich mit den Atemzügen)
 from tkinter import filedialog  # filedialog = Modul aus tkinter um Dateien auswählen zu können
 from .logic import AtemzugValidierungLogic
 from .breath import AtemzugValidierungBreaths
@@ -33,11 +33,14 @@ class AtemzugValidierungGUI(tk.Tk):
         self.interval_button = None
         self.backwards_button = None
         self.forwards_button = None
+        self.fast_backwards_button = None
+        self.fast_forwards_button = None
         self.full_graph_button = None
         self.interval_entry = None
         self.save_interval_button = None
         self.thirty_sec_interval_button = None
         self.sixty_sec_interval_button = None
+        self.new_breath_area_button = None
         self.invalid_breath_button = None
         self.export_button = None
         self.values_label = None
@@ -169,6 +172,7 @@ class AtemzugValidierungGUI(tk.Tk):
             self.set_starting_point()
             # Leert das Eingabefeld (NACHFARGEN OB GEBRAUCHT WIRD) - auch in Zeile 65
             '''self.starting_point_entry.delete(0, tk.END)'''
+        # das Event <Return> wird and die Funktion trigger_interval_button gebunden
         self.starting_point_entry.bind("<Return>", trigger_interval_button)
 
         # Button zum rückwärts Navigieren im Plot
@@ -297,7 +301,7 @@ class AtemzugValidierungGUI(tk.Tk):
                                        state="disabled", height=2, width=button_width, wraplength=120)
         self.export_button.grid(row=6, column=4, padx=5, pady=5, sticky="w")
 
-        self.breath_list_area.column("#0", width=0, stretch=tk.NO) # Phantomspalte. Ist immer da
+        self.breath_list_area.column("#0", width=0, stretch=tk.NO)  # Phantom Spalte. Ist immer da. Breite=0 damit man sie nicht sieht.
         self.breath_list_area.column("column_number", anchor="e", width=40, minwidth=40)
         self.breath_list_area.column("column_start", anchor="e", width=100, minwidth=100)
         self.breath_list_area.column("column_end", anchor="e", width=100, minwidth=100)
@@ -423,22 +427,23 @@ class AtemzugValidierungGUI(tk.Tk):
             breath_number = self.breath_list_area.item(selected_item, "values")[0]
             selected_index = int(breath_number) - 1
 
-            self.entry = tk.Entry(self.breath_list_area)
-            self.entry.place(x=x, y=y, width=width, height=height)
-            self.entry.insert(0, comment_value)
-            self.entry.focus()
+            entry = tk.Entry(self.breath_list_area)
+            entry.place(x=x, y=y, width=width, height=height)
+            entry.insert(0, comment_value)
+            entry.focus()
 
             # Funktion speichert neuen wert im Feld und entfernt Fokus von Liste
             def on_entry_confirm(event):
                 # neuen kommentar auslesen
-                new_comment_value = self.entry.get()
+                new_comment_value = entry.get()
 
                 # Funktion speichert Textwert in Spalte "Kommentar" und passt entsprechen Status des Datensatzes an
                 def get_new_data(data, text_value):
                     first_5_min_text = "Atemzug befindet sich innerhalb der ersten 5 Minuten!"
                     last_5_min_text = "Atemzug befindet sich innerhalb der letzten 5 Minuten!"
+                    invalid_breath = "kein Atemzug!"
 
-                    if (text_value.startswith("kein Atemzug!") or text_value == first_5_min_text
+                    if (text_value.startswith(invalid_breath) or text_value == first_5_min_text
                             or text_value == last_5_min_text):
                         data[3] = 0
                         data[4] = text_value
@@ -463,11 +468,12 @@ class AtemzugValidierungGUI(tk.Tk):
                 # Datensatz wird zurück zum Tupel konvertiert und in breath_list gespeichert
                 self.breath.breath_list[selected_index] = tuple(new_tuple)
 
-                self.entry.destroy()
+                entry.destroy()
 
-            # Ereignis binden, wenn die Eingabe bestätigt wird
-            self.entry.bind("<Return>", on_entry_confirm)
-            self.entry.bind("<FocusOut>", lambda event: self.entry.destroy())
+            # Funktion mit ENTER-Taste ausführen
+            entry.bind("<Return>", on_entry_confirm)
+            # das erzeugte Eingabefeld entry über dem Kommentar wird wieder entfernt, nachdem der Fokus vom Feld entfernt wird.
+            entry.bind("<FocusOut>", lambda event: entry.destroy())
 
     # Funktion aktualisiert die Information für validen Druckbereich und Dauer
     def list_info_text(self):
@@ -614,7 +620,6 @@ class AtemzugValidierungGUI(tk.Tk):
             for data in breath_list:
                 if float(breath_list[index][2]) <= starting_point + interval <= float(breath_list[index + 1][2]):
                     last_data = data
-                    index = 0
                     break
                 index += 1
 

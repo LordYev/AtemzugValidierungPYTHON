@@ -1,5 +1,5 @@
 # Version 1.3.1 - 29.07.2024
-1. Code Anpassungen (keine Funktionalen Änderungen)
+1. Code Anpassungen (keine funktionalen Änderungen)
 2. README Anpassung
 
 # Version 1.3 - 27.07.2024
@@ -21,7 +21,7 @@
    - Darstellung des Fensters zur erneuten Berechnung des Beatmungsbereiches eingefügt.
 
 # Version 1.1 - 25.07.2024
-1. Info Label mit Grenzwerten angepasst:
+1. Info-Label mit Grenzwerten angepasst:
     - Altes Label wird gelöscht bevor ein neues erzeugt wird (keine Überlappung mehr)
   
 2. Intervall plotten
@@ -32,7 +32,7 @@
 3. Navigation vorwärts & rückwärts
     - Die Navigation mit den Pfeiltasten funktioniert jetzt nur, 
   wenn man sich in einem Intervall befindet. 
-  Wenn der gesamte Datensatz angezeigt wird, passiert nichts mehr -> 
+  Wenn der gesamte Datensatz angezeigt wird, passiert nichts mehr → 
   kein Fehler wird erzeugt
     - Navigation funktioniert nicht mehr, 
   wenn ein Eingabefeld ausgewählt ist. 
