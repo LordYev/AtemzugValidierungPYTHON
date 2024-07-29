@@ -69,12 +69,19 @@ Sie können das Programm mit folgendem Befehl in der Konsole starten:
 runazv
 ```
 
-# Projekt aktualisieren
-Um das Projekt zu aktualisieren und auf eine neue Version zu bringen
+# Aktualisierung
+Um das Programm zu aktualisieren und auf eine neue Version zu bringen
 muss man nicht die komplette Installation erneut durchführen.
 Dazu reicht der folgende Befehl in der Konsole:
 ```bash
 pip install --upgrade git+https://github.com/LordYev/AtemzugValidierungPYTHON
+```
+
+# Deinstallation
+Um das Programm endgültig zu entfernen, müssen Sie folgenden Befehl in der
+Konsole eingeben:
+```bash
+pip uninstall AtemzugValidierung
 ```
 
 # Benutzeranleitung

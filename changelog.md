@@ -1,5 +1,6 @@
 # Version 1.3.1 - 29.07.2024
 1. Code Anpassungen (keine Funktionalen Änderungen)
+2. README Anpassung
 
 # Version 1.3 - 27.07.2024
 1. GUI für Windows angepasst
