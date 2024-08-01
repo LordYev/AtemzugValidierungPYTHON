@@ -16,11 +16,11 @@ class AtemzugValidierungLogic:
         self.canvas = None
         self.raw_mask_edf_data = None
         self.raw_device_edf_data = None
-        self.mask_edf_meta_data = None
+        self.mask_sampling_frequency = None
         self.mask_edf_data = None
         self.mask_edf_times = None
         self.duration_mask = None
-        self.device_edf_meta_data = None
+        self.device_sampling_frequency = None
         self.device_edf_data = None
         self.device_edf_times = None
         self.duration_device = None
@@ -53,25 +53,24 @@ class AtemzugValidierungLogic:
             self.starting_point = float(starting_point_entry)
 
     # Funktion zum erneuten Plotten der Daten in einem 30-Sekunden Intervall
-    def plot_edf_interval(self, mask_edf_meta_data, mask_edf_data, device_edf_meta_data, device_edf_data, starting_point, interval,
-                          breath_start, breath_end):
+    def plot_edf_interval(self, starting_point, interval, breath_start, breath_end):
         try:
             # Berechnet den Endzeitpunkt des Intervalls
             end_point = starting_point + interval
 
             # Start- und Endindex für Mask- und Device-Kurve berechnen (Zeitpunkt * Abtastrate)
-            mask_start_index = int(starting_point * mask_edf_meta_data["sfreq"])
-            mask_end_index = int(end_point * mask_edf_meta_data["sfreq"])
+            mask_start_index = int(starting_point * self.mask_sampling_frequency)
+            mask_end_index = int(end_point * self.mask_sampling_frequency)
 
-            device_start_index = int((starting_point - self.time_difference_start[0]) * device_edf_meta_data["sfreq"])
-            device_end_index = int((end_point - self.time_difference_end[0]) * device_edf_meta_data["sfreq"])
+            device_start_index = int((starting_point - self.time_difference_start[0]) * self.device_sampling_frequency)
+            device_end_index = int((end_point - self.time_difference_end[0]) * self.device_sampling_frequency)
 
             # Skalierung der Device-Kurve
-            scaled_device_data = self.scale_factor * device_edf_data[0, device_start_index:device_end_index]
+            scaled_device_data = self.scale_factor * self.device_edf_data[0, device_start_index:device_end_index]
 
             # Zeitintervall für Mask und Device erzeugen
-            mask_interval = np.arange(starting_point, end_point, 1 / mask_edf_meta_data["sfreq"])
-            device_interval = np.arange(starting_point, end_point, 1 / mask_edf_meta_data["sfreq"])
+            mask_interval = np.arange(starting_point, end_point, 1 / self.mask_sampling_frequency)
+            device_interval = np.arange(starting_point, end_point, 1 / self.mask_sampling_frequency)
 
             # Bestimme das kürzere Array aus Mask oder Device
             min_length = min(len(mask_interval), len(device_interval))
@@ -88,8 +87,8 @@ class AtemzugValidierungLogic:
             for line in ax.lines:
                 line.remove()
 
-            # Plottet die neuen Linien für das Intervall
-            ax.plot(mask_interval, mask_edf_data[0, mask_start_index:mask_end_index][:min_length], label="Mask", color="blue")
+            # Plottet die neuen Kurven für das Intervall
+            ax.plot(mask_interval, self.mask_edf_data[0, mask_start_index:mask_end_index][:min_length], label="Mask", color="blue")
             ax.plot(device_interval, scaled_device_data, label="Device", color="red")
             ax.axhline(self.pressure_median, label="Schwellenwert", color="green", linestyle="dashed")
 
@@ -112,31 +111,28 @@ class AtemzugValidierungLogic:
             print(f"\033[31m ERROR \033[33m Fehler beim Plotten der Daten: \033[93m {error_code} \033[0m")
             print(f"\033[33m Klasse: \033[93m AtemzugValidierungLogic \033[33m / Funktion: \033[93m plot_edf_interval() \033[0m")
 
-    # Funktion zum Aufrufen mehrerer Funktionen zeitgleich
-    def use_multiple_funcs(self, starting_point_entry, starting_point, backward, forward, fast_backward, fast_forward, breath_start, breath_end):
+    # Funktion ruft zwei weiter Funktionen auf, um Startpunkt des Intervalls festzulegen und zu plotten
+    def create_interval_window(self, starting_point_entry, starting_point, backward, forward, fast_backward, fast_forward, breath_start, breath_end):
         self.set_starting_point(starting_point_entry, starting_point, backward, forward, fast_backward, fast_forward)
-        self.plot_edf_interval(self.mask_edf_meta_data, self.mask_edf_data, self.device_edf_meta_data, self.device_edf_data, self.starting_point,
-                               self.interval, breath_start, breath_end)
+        self.plot_edf_interval(self.starting_point, self.interval, breath_start, breath_end)
 
     # Funktion zum Ermitteln der Synchronisierungspunkte
     def get_sync_points(self):
         start_sync_point = None
         end_sync_point = None
 
-        start_index = int(0 * self.mask_edf_meta_data["sfreq"])
-
+        start_index = 0
         # For-Schleife läuft vom start_index solange durch, bis es den Anfang des 1ten Synchronisierungspunktes ermittelt hat
         for i in range(start_index, len(self.mask_edf_data[0]) - 1):
             if self.mask_edf_data[0, i] > 2:
-                start_sync_point = i / self.mask_edf_meta_data["sfreq"]
+                start_sync_point = i / self.mask_sampling_frequency
                 break
 
-        start_index = int((self.duration_mask - 1) * self.mask_edf_meta_data["sfreq"])
-
+        start_index = int((self.duration_mask - 1) * self.mask_sampling_frequency)
         # For-Schleife läuft rückwärts vom start_index solange durch, bis es das Ende des 2ten Synchronisierungspunktes ermittelt hat
         for i in reversed(range(start_index)):
             if self.mask_edf_data[0, i] > 2:
-                end_sync_point = i / self.mask_edf_meta_data["sfreq"]
+                end_sync_point = i / self.mask_sampling_frequency
                 break
 
         # Festlegen der Punkte zwischen welchen die Atemzüge ermittelt werden sollen
@@ -160,8 +156,8 @@ class AtemzugValidierungLogic:
 
         for i in range(len(results)):
             # Bestimme Start- und Endpunkt des 1ten Synchronisierungspunktes
-            start_index = int(sync_point * self.mask_edf_meta_data["sfreq"])
-            end_index = int((sync_point + 60) * self.mask_edf_meta_data["sfreq"])
+            start_index = int(sync_point * self.mask_sampling_frequency)
+            end_index = int((sync_point + 60) * self.mask_sampling_frequency)
 
             # Begrenze beide Kurven auf das Intervall zwischen start_index und end_index
             mask_timeframe = self.mask_edf_data[:, start_index:end_index]
@@ -172,22 +168,14 @@ class AtemzugValidierungLogic:
             device_max_index = np.argmax(device_timeframe, axis=1)
 
             # Finde die Zeitpunkte der maximalen Werte
-            mask_sync_point_times = (start_index + mask_max_index) / self.mask_edf_meta_data["sfreq"]
-            device_sync_point_times = (start_index + device_max_index) / self.device_edf_meta_data["sfreq"]
+            mask_sync_point_times = (start_index + mask_max_index) / self.mask_sampling_frequency
+            device_sync_point_times = (start_index + device_max_index) / self.device_sampling_frequency
 
             # Errechnet die Zeitdifferenz zwischen den beiden Maximalwerten der Kurven
             results[i] = mask_sync_point_times - device_sync_point_times
             sync_point = end_sync_point
 
         time_difference_start, time_difference_end = results
-
-        """# Ausgaben in der Konsole zur Kontrolle
-        print(f"ENDZEIT: {end_index}")
-        print("Mask: ", mask_sync_points)
-        print("Device: ", device_sync_points)
-        print("Mask Zeitpunkte: ", mask_sync_point_times)
-        print("Device Zeitpunkte: ", device_sync_point_times)
-        print("Differenz: ", time_difference)"""
 
         return time_difference_start, time_difference_end
 
@@ -221,9 +209,9 @@ class AtemzugValidierungLogic:
         scaled_device_data = self.scale_factor * self.device_edf_data[0, :]
 
         # Erzeugt Arrays mit zeitpunkten für Mask- und Device-Kurve
-        mask_time = np.arange(0, self.duration_mask, 1 / self.mask_edf_meta_data["sfreq"])
-        device_time = np.arange(0 + self.time_difference_start[0],
-                                self.duration_device + self.time_difference_end[0], 1 / self.device_edf_meta_data["sfreq"])
+        mask_time = np.arange(0, self.duration_mask, 1 / self.mask_sampling_frequency)
+        device_time = np.arange(0 + self.time_difference_start[0], self.duration_device + self.time_difference_end[0],
+                                1 / self.device_sampling_frequency)
 
         # Bestimmt das kürzere Array aus Mask oder Device
         min_length = min(len(mask_time), len(device_time))
@@ -252,17 +240,17 @@ class AtemzugValidierungLogic:
                 self.raw_device_edf_data = mne.io.read_raw_edf(device_edf_file_path)
 
                 # Daten für mask.edf Datei
-                self.mask_edf_meta_data = self.raw_mask_edf_data.info  # gibt Metadaten zurück
+                self.mask_sampling_frequency = self.raw_mask_edf_data.info["sfreq"]  # gibt Abtastrate (sfreq "Sampling Frequency") zurück
                 self.mask_edf_data = self.raw_mask_edf_data.get_data()  # gibt Kanäle und Zeitpunkte zurück (n_channels, n_times)
                 self.mask_edf_times = self.raw_mask_edf_data.n_times  # gibt Anzahl der Zeitpunkte zurück
-                # Dauer der Beatmung = Anzahl der Zeitpunkte / Abtastrate (sfreq "Sampling Frequency")
-                self.duration_mask = self.mask_edf_times / self.mask_edf_meta_data["sfreq"]
+                # Dauer der Beatmung = Anzahl der Zeitpunkte / Abtastrate
+                self.duration_mask = self.mask_edf_times / self.mask_sampling_frequency
 
                 # Daten für device.edf Datei
-                self.device_edf_meta_data = self.raw_device_edf_data.info
+                self.device_sampling_frequency = self.raw_device_edf_data.info["sfreq"]
                 self.device_edf_data = self.raw_device_edf_data.get_data()
                 self.device_edf_times = self.raw_device_edf_data.n_times
-                self.duration_device = self.device_edf_times / self.device_edf_meta_data["sfreq"]
+                self.duration_device = self.device_edf_times / self.device_sampling_frequency
 
             self.plot_edf_data()
 

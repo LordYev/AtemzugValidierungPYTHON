@@ -8,7 +8,7 @@ class AtemzugValidierungBreaths:
         self.breath_list_valid_data = None
         self.breath_list_invalid_data = None
         self.breath_list_commented_data = None
-        self.mask_edf_meta_data = None
+        self.mask_sampling_frequency = None
         self.mask_edf_data = None
         self.pressure_median = None
         self.min_pressure = None
@@ -160,14 +160,14 @@ class AtemzugValidierungBreaths:
         reversed_func = False
 
         # beginnt die Suche nach dem Beatmungsbereich, nach den Synchronisierungspunkten am Anfang
-        start_index = int(float(self.start_analyses_index) * self.mask_edf_meta_data['sfreq'])
+        start_index = int(float(self.start_analyses_index) * self.mask_sampling_frequency)
         ventilation_start = self.get_ventilation_area(start_index, reversed_func)
 
         # Parameter auf True setzen, damit Funktion get_ventilation_area die Liste rückwärts durchläuft
         reversed_func = True
 
         # beginnt die Suche nach dem Beatmungsbereich, nach den Synchronisierungspunkten am Ende
-        start_index = int(float(self.end_analyses_index) * self.mask_edf_meta_data['sfreq'])
+        start_index = int(float(self.end_analyses_index) * self.mask_sampling_frequency)
         ventilation_end = self.get_ventilation_area(start_index, reversed_func)
 
         return ventilation_start, ventilation_end

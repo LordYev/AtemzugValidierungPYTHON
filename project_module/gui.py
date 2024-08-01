@@ -96,11 +96,11 @@ class AtemzugValidierungGUI(tk.Tk):
         self.logic.duration_to_previous_anomaly = 0
         self.logic.raw_mask_edf_data = None
         self.logic.raw_device_edf_data = None
-        self.logic.mask_edf_meta_data = None
+        self.logic.mask_sampling_frequency = None
         self.logic.mask_edf_data = None
         self.logic.mask_edf_times = None
         self.logic.duration_mask = None
-        self.logic.device_edf_meta_data = None
+        self.logic.device_sampling_frequency = None
         self.logic.device_edf_data = None
         self.logic.device_edf_times = None
         self.logic.duration_device = None
@@ -116,7 +116,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath.breath_list_valid_data = None
         self.breath.breath_list_invalid_data = None
         self.breath.breath_list_commented_data = None
-        self.breath.mask_edf_meta_data = None
+        self.breath.mask_sampling_frequency = None
         self.breath.mask_edf_data = None
         self.breath.pressure_median = None
         self.breath.min_pressure = None
@@ -370,7 +370,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
                 # Übergibt Daten aus logic an breath
                 # Aus breath kann man nicht direkt z.B. auf Daten in mask_edf_meta_data in logic zugreifen -> None
-                self.breath.mask_edf_meta_data = self.logic.mask_edf_meta_data
+                self.breath.mask_sampling_frequency = self.logic.mask_sampling_frequency
                 self.breath.mask_edf_data = self.logic.mask_edf_data
 
                 self.determine_breaths()
@@ -399,9 +399,9 @@ class AtemzugValidierungGUI(tk.Tk):
                 if self.interval_is_showen is True:
                     self.breath_start = selected_data_values[1]
                     self.breath_end = selected_data_values[2]
-                    self.logic.use_multiple_funcs(self.starting_point, self.starting_point, self.forward, self.backward,
-                                                  self.fast_backward, self.fast_forward, self.breath_start,
-                                                  self.breath_end)
+                    self.logic.create_interval_window(self.starting_point, self.starting_point, self.forward, self.backward,
+                                                      self.fast_backward, self.fast_forward, self.breath_start,
+                                                      self.breath_end)
                     self.breath_start = None
                     self.breath_end = None
 
@@ -579,9 +579,9 @@ class AtemzugValidierungGUI(tk.Tk):
                 self.fast_backwards_button.config(state="normal")
                 self.fast_forwards_button.config(state="normal")
                 self.starting_point = self.starting_point_entry.get()
-                self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.forward,
-                                              self.backward, self.fast_backward, self.fast_forward, self.breath_start,
-                                              self.breath_end)
+                self.logic.create_interval_window(self.starting_point_entry.get(), self.starting_point, self.forward,
+                                                  self.backward, self.fast_backward, self.fast_forward, self.breath_start,
+                                                  self.breath_end)
                 self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
 
         except Exception as error_code:
@@ -594,9 +594,9 @@ class AtemzugValidierungGUI(tk.Tk):
         focus = self.focus_get()
         # Navigation soll nicht möglich sein, wenn Fokus noch auf Eingabefeld in Kommentarspalte liegt
         if str(focus).startswith(".!frame.!treeview.!entry") is not True:
-            self.logic.use_multiple_funcs(self.starting_point_entry.get(), self.starting_point, self.backward,
-                                          self.forward, self.fast_backward, self.fast_forward, self.breath_start,
-                                          self.breath_end)
+            self.logic.create_interval_window(self.starting_point_entry.get(), self.starting_point, self.backward,
+                                              self.forward, self.fast_backward, self.fast_forward, self.breath_start,
+                                              self.breath_end)
             self.starting_point = self.logic.starting_point
             self.determine_breaths_in_interval(self.starting_point, self.logic.interval)
 
