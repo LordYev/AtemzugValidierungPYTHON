@@ -70,6 +70,16 @@ class AtemzugValidierungGUI(tk.Tk):
 
     # Funktion zum Zurücksetzen der wichtigsten Parameter
     def all_parameters_set_back(self):
+        # Sperrt die buttons
+        self.backwards_button.config(state="disabled")
+        self.forwards_button.config(state="disabled")
+        self.fast_backwards_button.config(state="disabled")
+        self.fast_forwards_button.config(state="disabled")
+
+        # Leert die Eingabefelder
+        self.starting_point_entry.delete(0, tk.END)
+        self.interval_entry.delete(0, tk.END)
+
         # Parameter der Klasse AtemzugValidierungGUI
         self.mask_edf_path = None
         self.device_edf_path = None
@@ -327,7 +337,7 @@ class AtemzugValidierungGUI(tk.Tk):
         # führt beim Doppelklick die Funktion on_breath_double_click aus
         self.breath_list_area.bind("<Double-1>", self.on_breath_double_click)
 
-    # Funktion um einen festen Graphen wieder zugeben
+    # Funktion um das Plot-Fenster zu erzeugen und zu platzieren
     def update_canvas(self):
         canvas = self.logic.canvas.get_tk_widget()
         canvas.grid(row=2, column=0, columnspan=10, padx=5, pady=5, sticky='w')
@@ -340,22 +350,22 @@ class AtemzugValidierungGUI(tk.Tk):
                 # setzt alle Parameter zurück, damit diese die neue Beatmungsdatei nicht beeinflussen
                 self.all_parameters_set_back()
 
+                # folder_path_text wird geleert und mit neuem Pfad befüllt
                 folder_path_text.delete(1.0, tk.END)
                 folder_path_text.insert(tk.END, folder_path)
-                mask_edf_file_path = None
-                device_edf_file_path = None
+
+                # Schleife durchläuft alle Dateien im Verzeichnis durch und sucht nach den EDF-Dateien
                 for file_name in os.listdir(folder_path):
                     if file_name.endswith("mask.edf"):
-                        mask_edf_file_path = os.path.join(folder_path, file_name)
-                        self.mask_edf_path = mask_edf_file_path
+                        self.mask_edf_path = os.path.join(folder_path, file_name)
                     elif file_name.endswith("device.edf"):
-                        device_edf_file_path = os.path.join(folder_path, file_name)
-                        self.device_edf_path = device_edf_file_path
+                        self.device_edf_path = os.path.join(folder_path, file_name)
                 # Raw_Objekt soll wieder auf None gesetzt werden, damit eine neue EDF-Datei geladen werden kann
                 self.logic.raw_mask_edf_data = None
                 self.logic.raw_device_edf_data = None
 
-                self.logic.read_edf_file(mask_edf_file_path, device_edf_file_path)
+                # EDF-Dateien werden eingelesen und Plot-Fenster wird erzeugt
+                self.logic.read_edf_file(self.mask_edf_path, self.device_edf_path)
                 self.update_canvas()
 
                 # Übergibt Daten aus logic an breath
@@ -364,17 +374,6 @@ class AtemzugValidierungGUI(tk.Tk):
                 self.breath.mask_edf_data = self.logic.mask_edf_data
 
                 self.determine_breaths()
-
-                # Sperrt beide buttons
-                # hier werden die Buttons erneut gesperrt, da diese Funktion zum wiederholten Plotten verwendet wird
-                self.backwards_button.config(state="disabled")
-                self.forwards_button.config(state="disabled")
-                self.fast_backwards_button.config(state="disabled")
-                self.fast_forwards_button.config(state="disabled")
-
-                # Leert die Eingabefelder
-                self.starting_point_entry.delete(0, tk.END)
-                self.interval_entry.delete(0, tk.END)
 
         except Exception as error_code:
             print(f"\033[31m ERROR \033[33m Fehler beim laden der EDF-Dateien: \033[93m {error_code} \033[0m")
@@ -506,6 +505,7 @@ class AtemzugValidierungGUI(tk.Tk):
         for item in self.breath_list_area.get_children():
             self.breath_list_area.delete(item)
 
+    # Funktion zum Ermitteln der Atemzüge zwischen zwei Zeitpunkten
     def determine_breaths(self):
         try:
             # Übergabe der Zeitpunkte zwischen welchen die Atemzüge ermittelt werden
@@ -537,6 +537,7 @@ class AtemzugValidierungGUI(tk.Tk):
             print(f"\033[33m Klasse: \033[93m AtemzugValidierungGUI \033[33m / "
                   f"Funktion: \033[93m determine_breaths() \033[0m")
 
+    # Funktion zum Ermitteln der Atemzüge in einem Intervall
     def determine_breaths_in_interval(self, interval_start, interval_duration):
         try:
             self.clear_list_area()

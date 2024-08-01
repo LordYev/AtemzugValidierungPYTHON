@@ -128,7 +128,7 @@ class AtemzugValidierungLogic:
         # For-Schleife läuft vom start_index solange durch, bis es den Anfang des 1ten Synchronisierungspunktes ermittelt hat
         for i in range(start_index, len(self.mask_edf_data[0]) - 1):
             if self.mask_edf_data[0, i] > 2:
-                start_sync_point = i / 10000
+                start_sync_point = i / self.mask_edf_meta_data["sfreq"]
                 break
 
         start_index = int((self.duration_mask - 1) * self.mask_edf_meta_data["sfreq"])
@@ -136,16 +136,16 @@ class AtemzugValidierungLogic:
         # For-Schleife läuft rückwärts vom start_index solange durch, bis es das Ende des 2ten Synchronisierungspunktes ermittelt hat
         for i in reversed(range(start_index)):
             if self.mask_edf_data[0, i] > 2:
-                end_sync_point = i / 10000
+                end_sync_point = i / self.mask_edf_meta_data["sfreq"]
                 break
 
         # Festlegen der Punkte zwischen welchen die Atemzüge ermittelt werden sollen
-        self.breath_search_start_point = int((start_sync_point + 0.6) * self.mask_edf_meta_data["sfreq"])
-        self.breath_search_end_point = int((end_sync_point - 0.6) * self.mask_edf_meta_data["sfreq"])
+        self.breath_search_start_point = int(start_sync_point + 60)
+        self.breath_search_end_point = int(end_sync_point - 60)
 
         # Startpunkt wird um 5sec und Endpunkt um 30sec nach links verschoben
-        start_sync_point = int((start_sync_point - 0.05) * self.mask_edf_meta_data["sfreq"])
-        end_sync_point = int((end_sync_point - 0.3) * self.mask_edf_meta_data["sfreq"])
+        start_sync_point = int(start_sync_point - 5)
+        end_sync_point = int(end_sync_point - 30)
 
         return start_sync_point, end_sync_point
 
@@ -245,25 +245,24 @@ class AtemzugValidierungLogic:
 
     # Funktion um EDF-Datei zu einzulesen
     def read_edf_file(self, mask_edf_file_path, device_edf_file_path):
-        # try-except Block welcher den gesamten Graphen plottet
         try:
             if self.raw_mask_edf_data is None or self.raw_device_edf_data is None:
                 # EDF Daten werden in ein Raw-Objekt geladen
-                self.raw_mask_edf_data = mne.io.read_raw_edf(mask_edf_file_path, preload=True)
-                self.raw_device_edf_data = mne.io.read_raw_edf(device_edf_file_path, preload=True)
+                self.raw_mask_edf_data = mne.io.read_raw_edf(mask_edf_file_path)
+                self.raw_device_edf_data = mne.io.read_raw_edf(device_edf_file_path)
 
-            # Daten für mask.edf Datei
-            self.mask_edf_meta_data = self.raw_mask_edf_data.info
-            self.mask_edf_data = self.raw_mask_edf_data.get_data()
-            self.mask_edf_times = self.raw_mask_edf_data.n_times
-            # Dauer der Beatmung = Gesamtanzahl der Zeitpunkte / Abtastrate (sfreq)
-            self.duration_mask = self.mask_edf_times / self.mask_edf_meta_data["sfreq"]
+                # Daten für mask.edf Datei
+                self.mask_edf_meta_data = self.raw_mask_edf_data.info  # gibt Metadaten zurück
+                self.mask_edf_data = self.raw_mask_edf_data.get_data()  # gibt Kanäle und Zeitpunkte zurück (n_channels, n_times)
+                self.mask_edf_times = self.raw_mask_edf_data.n_times  # gibt Anzahl der Zeitpunkte zurück
+                # Dauer der Beatmung = Anzahl der Zeitpunkte / Abtastrate (sfreq "Sampling Frequency")
+                self.duration_mask = self.mask_edf_times / self.mask_edf_meta_data["sfreq"]
 
-            # Daten für device.edf Datei
-            self.device_edf_meta_data = self.raw_device_edf_data.info
-            self.device_edf_data = self.raw_device_edf_data.get_data()
-            self.device_edf_times = self.raw_device_edf_data.n_times
-            self.duration_device = self.device_edf_times / self.device_edf_meta_data["sfreq"]
+                # Daten für device.edf Datei
+                self.device_edf_meta_data = self.raw_device_edf_data.info
+                self.device_edf_data = self.raw_device_edf_data.get_data()
+                self.device_edf_times = self.raw_device_edf_data.n_times
+                self.duration_device = self.device_edf_times / self.device_edf_meta_data["sfreq"]
 
             self.plot_edf_data()
 
