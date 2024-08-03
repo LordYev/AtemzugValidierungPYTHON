@@ -62,23 +62,21 @@ class AtemzugValidierungLogic:
             mask_start_index = int(starting_point * self.mask_sampling_frequency)
             mask_end_index = int(end_point * self.mask_sampling_frequency)
 
-            device_start_index = int((starting_point - self.time_difference_start[0]) * self.device_sampling_frequency)
-            device_end_index = int((end_point - self.time_difference_end[0]) * self.device_sampling_frequency)
-
-            # Skalierung der Device-Kurve
-            scaled_device_data = self.scale_factor * self.device_edf_data[0, device_start_index:device_end_index]
+            device_start_index = int((starting_point - self.time_difference_start) * self.device_sampling_frequency)
+            device_end_index = int((end_point - self.time_difference_end) * self.device_sampling_frequency)
 
             # Zeitintervall für Mask und Device erzeugen
             mask_interval = np.arange(starting_point, end_point, 1 / self.mask_sampling_frequency)
-            device_interval = np.arange(starting_point, end_point, 1 / self.mask_sampling_frequency)
+            device_interval = np.linspace(starting_point, end_point, len(np.arange(starting_point - self.time_difference_start,
+                                                                                   end_point - self.time_difference_end,
+                                                                                   1 / self.device_sampling_frequency)))
 
             # Bestimme das kürzere Array aus Mask oder Device
             min_length = min(len(mask_interval), len(device_interval))
 
             # Passe die Längen der Arrays (Zeitpunkte) an
-            mask_interval = mask_interval[:min_length]
-            device_interval = device_interval[:min_length]
-            scaled_device_data = scaled_device_data[:min_length]
+            adapted_mask_interval = mask_interval[:min_length]
+            adapted_device_interval = device_interval[:min_length]
 
             # Erstellt/Aktualisiert die vorhandene Figur und Achsen
             ax = plt.gca()
@@ -88,8 +86,8 @@ class AtemzugValidierungLogic:
                 line.remove()
 
             # Plottet die neuen Kurven für das Intervall
-            ax.plot(mask_interval, self.mask_edf_data[0, mask_start_index:mask_end_index][:min_length], label="Mask", color="blue")
-            ax.plot(device_interval, scaled_device_data, label="Device", color="red")
+            ax.plot(adapted_mask_interval, self.mask_edf_data[0, mask_start_index:mask_end_index][:min_length], label="Mask", color="blue")
+            ax.plot(adapted_device_interval, self.device_edf_data[0, device_start_index:device_end_index][:min_length], label="Device", color="red")
             ax.axhline(self.pressure_median, label="Schwellenwert", color="green", linestyle="dashed")
 
             # Wenn die übergebenen Variablen Zeitpunkte haben, dann soll dort jeweils eine Senkrechte Linie geplottet werden
@@ -98,7 +96,7 @@ class AtemzugValidierungLogic:
                 ax.axvline(float(breath_end), color='orange')
 
             # Setzt die Grenzen der x-Achse entsprechend den Zeitintervallen
-            ax.set_xlim(mask_interval[0], device_interval[-1])
+            ax.set_xlim(adapted_mask_interval[0], adapted_device_interval[-1])
 
             # Aktualisierung des Labels zum Anzeigen der aktuellen Intervalldauer
             ax.set_xlabel(f"Zeit in Sekunden (aktuelle Intervalldauer: {int(self.interval)}sek)")
@@ -120,26 +118,32 @@ class AtemzugValidierungLogic:
     def get_sync_points(self):
         start_sync_point = None
         end_sync_point = None
-
         start_index = 0
+        # legt als end_index die kleinere Anzahl an Zeitpunkten fest
+        if self.device_edf_times < self.mask_edf_times:
+            end_index = self.device_edf_times
+        else:
+            end_index = self.mask_edf_times
+
         # For-Schleife läuft vom start_index solange durch, bis es den Anfang des 1ten Synchronisierungspunktes ermittelt hat
-        for i in range(start_index, len(self.mask_edf_data[0]) - 1):
+        for i in range(start_index, end_index):
+            # überprüft, ob der Wert im ersten Kanal zum Zeitpunkt i einen Wert über 2mbar hat
             if self.mask_edf_data[0, i] > 2:
                 start_sync_point = i / self.mask_sampling_frequency
                 break
 
-        start_index = int((self.duration_mask - 1) * self.mask_sampling_frequency)
-        # For-Schleife läuft rückwärts vom start_index solange durch, bis es das Ende des 2ten Synchronisierungspunktes ermittelt hat
-        for i in reversed(range(start_index)):
+        # For-Schleife läuft rückwärts von end_index solange durch, bis es das Ende des 2ten Synchronisierungspunktes ermittelt hat
+        for i in reversed(range(start_index, end_index)):
             if self.mask_edf_data[0, i] > 2:
                 end_sync_point = i / self.mask_sampling_frequency
                 break
 
-        # Festlegen der Punkte zwischen welchen die Atemzüge ermittelt werden sollen
+        # Festlegen der Punkte zwischen welchen die Atemzüge ermittelt werden sollen.
+        # Punkte werden außerhalb der Synchronisationspunkte verschoben, um diese nicht mehr zu beachten.
         self.breath_search_start_point = int(start_sync_point + 60)
         self.breath_search_end_point = int(end_sync_point - 60)
 
-        # Startpunkt wird um 5sec und Endpunkt um 30sec nach links verschoben
+        # Startpunkt wird um 5sek und Endpunkt um 30sek nach links verschoben. Startpunkte werden jeweils vor die Synchronisationspunkte gebracht.
         start_sync_point = int(start_sync_point - 5)
         end_sync_point = int(end_sync_point - 30)
 
@@ -156,16 +160,17 @@ class AtemzugValidierungLogic:
 
         for i in range(len(results)):
             # Bestimme Start- und Endpunkt des 1ten Synchronisierungspunktes
+            # 60sek Intervall wird festgelegt
             start_index = int(sync_point * self.mask_sampling_frequency)
             end_index = int((sync_point + 60) * self.mask_sampling_frequency)
 
             # Begrenze beide Kurven auf das Intervall zwischen start_index und end_index
-            mask_timeframe = self.mask_edf_data[:, start_index:end_index]
-            device_timeframe = self.device_edf_data[:, start_index:end_index]
+            mask_timeframe = self.mask_edf_data[0, start_index:end_index]
+            device_timeframe = self.device_edf_data[0, start_index:end_index]
 
             # Finde die Indexe der Maximalwerte im festgelegten Zeitrahmen
-            mask_max_index = np.argmax(mask_timeframe, axis=1)
-            device_max_index = np.argmax(device_timeframe, axis=1)
+            mask_max_index = np.argmax(mask_timeframe)
+            device_max_index = np.argmax(device_timeframe)
 
             # Finde die Zeitpunkte der maximalen Werte
             mask_sync_point_times = (start_index + mask_max_index) / self.mask_sampling_frequency
@@ -195,35 +200,30 @@ class AtemzugValidierungLogic:
 
     # Funktion um EDF-Datei zu plotten
     def plot_edf_data(self):
-        # Schließt alle geöffneten Plots
+        # Schließt alle geöffneten Plot-Figuren
         plt.close("all")
         self.time_difference_start, self.time_difference_end = self.sync_edf_data()
 
-        # Erstellt eine Figur in der geplottet wird
-        fig, ax = self.create_figure()
-
-        # Skalierungsfaktor für die Device-Kurve um diese passend zu stauchen/strecken
-        self.scale_factor = (1 + self.time_difference_end[0] - self.time_difference_start[0])
-
-        # Skalierung der Device-Kurve
-        scaled_device_data = self.scale_factor * self.device_edf_data[0, :]
+        # Skalierungsfaktor für Device Kurve um diese an die mask Kurve anzupassen
+        self.scale_factor = self.duration_mask / (self.duration_device + self.time_difference_start + self.time_difference_end)
 
         # Erzeugt Arrays mit zeitpunkten für Mask- und Device-Kurve
         mask_time = np.arange(0, self.duration_mask, 1 / self.mask_sampling_frequency)
-        device_time = np.arange(0 + self.time_difference_start[0], self.duration_device + self.time_difference_end[0],
-                                1 / self.device_sampling_frequency)
+        device_time = np.arange(0, self.duration_device, 1 / self.device_sampling_frequency) * self.scale_factor
 
         # Bestimmt das kürzere Array aus Mask oder Device
         min_length = min(len(mask_time), len(device_time))
 
         # Passt die Längen der Arrays (Zeitpunkte) an
-        mask_time = mask_time[:min_length]
-        device_time = device_time[:min_length]
-        scaled_device_data = scaled_device_data[:min_length]
+        adopted_mask_time = mask_time[:min_length]
+        adopted_device_time = device_time[:min_length]
+
+        # Erstellt eine Figur in der geplottet wird
+        fig, ax = self.create_figure()
 
         # Plot der Mask-Kurve und der skalierten Device-Kurve
-        ax.plot(mask_time, self.mask_edf_data[0, :min_length], label="Mask", color="blue")
-        ax.plot(device_time, scaled_device_data, label="Device", color="red")
+        ax.plot(adopted_mask_time, self.mask_edf_data[0, :min_length], label="Mask", color="blue")
+        ax.plot(adopted_device_time, self.device_edf_data[0, :min_length], label="Device", color="red")
         ax.legend(loc="upper center", ncol=3)
 
         # Tkinter-Canvas-Objekt wird erstellt und Figur wird gezeichnet

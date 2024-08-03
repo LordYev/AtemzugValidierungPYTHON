@@ -1,4 +1,4 @@
-# Version 1.3.2 - 01.08.2024
+# Version 1.3.3 - 03.08.2024
 
 # Installation
 1. Dateien aus GitHub herunterladen und in gewünschtem Verzeichnis ablegen
