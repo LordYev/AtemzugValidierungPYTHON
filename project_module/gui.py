@@ -118,7 +118,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath.breath_list_commented_data = None
         self.breath.mask_sampling_frequency = None
         self.breath.mask_edf_data = None
-        self.breath.pressure_median = None
+        self.breath.threshold_value = None
         self.breath.min_pressure = None
         self.breath.max_pressure = None
         self.breath.min_duration = None
@@ -514,8 +514,8 @@ class AtemzugValidierungGUI(tk.Tk):
 
             # Atemzüge werden ermittelt und in Liste gespeichert
             self.breath.breath_list = self.breath.get_breaths()
-            # Übergibt Grenzwert aus breath an logic
-            self.logic.pressure_median = self.breath.pressure_median
+            # Übergibt Schwellenwert aus breath an logic
+            self.logic.pressure_median = self.breath.threshold_value
 
             # Entsperrt Buttons
             self.interval_button.config(state="normal")

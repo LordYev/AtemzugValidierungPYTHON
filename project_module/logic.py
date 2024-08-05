@@ -215,18 +215,18 @@ class AtemzugValidierungLogic:
         min_length = min(len(mask_time), len(device_time))
 
         # Passt die Längen der Arrays (Zeitpunkte) an
-        adopted_mask_time = mask_time[:min_length]
-        adopted_device_time = device_time[:min_length]
+        adapted_mask_time = mask_time[:min_length]
+        adapted_device_time = device_time[:min_length]
 
         # Erstellt eine Figur in der geplottet wird
         fig, ax = self.create_figure()
 
         # Plot der Mask-Kurve und der skalierten Device-Kurve
-        ax.plot(adopted_mask_time, self.mask_edf_data[0, :min_length], label="Mask", color="blue")
-        ax.plot(adopted_device_time, self.device_edf_data[0, :min_length], label="Device", color="red")
+        ax.plot(adapted_mask_time, self.mask_edf_data[0, :min_length], label="Mask", color="blue")
+        ax.plot(adapted_device_time, self.device_edf_data[0, :min_length], label="Device", color="red")
         ax.legend(loc="upper center", ncol=3)
 
-        # Tkinter-Canvas-Objekt wird erstellt und Figur wird gezeichnet
+        # Tkinter-Canvas-Objekt wird erstellt und Figur wird in GUI gezeichnet
         canvas = FigureCanvasTkAgg(fig)
         canvas.draw()
         self.canvas = canvas

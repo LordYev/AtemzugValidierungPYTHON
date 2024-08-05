@@ -10,7 +10,7 @@ class AtemzugValidierungBreaths:
         self.breath_list_commented_data = None
         self.mask_sampling_frequency = None
         self.mask_edf_data = None
-        self.pressure_median = None
+        self.threshold_value = None
         self.min_pressure = None
         self.max_pressure = None
         self.min_duration = None
@@ -24,8 +24,8 @@ class AtemzugValidierungBreaths:
     # Funktion zum Ermitteln des maximalen Drucks eines Atemzuges
     def get_pressure_peak(self, start_index, end_index):
         # Star und Ende werden umgerechnet, da es Kommazahlen mit zwei Nachkommastellen sind
-        start_index = int(start_index * 100)
-        end_index = int(end_index * 100)
+        start_index = int(start_index * self.mask_sampling_frequency)
+        end_index = int(end_index * self.mask_sampling_frequency)
         pressure_list = []
         # ermittelt jeden Druckwert zwischen Start und Ende, speichert diese in Liste pressure_list ab
         for i in range(start_index, end_index):
@@ -90,7 +90,6 @@ class AtemzugValidierungBreaths:
 
             breath_index += 1
 
-        self.get_pressure_peak(breath_list[2004][1], breath_list[2004][2])
         # Liste wird wieder in die ursprüngliche Form (Tupel) umgewandelt
         breath_list = [tuple(item) for item in breath_list]
 
@@ -173,16 +172,14 @@ class AtemzugValidierungBreaths:
         return ventilation_start, ventilation_end
 
     # Funktion zum Ermitteln des am meist vorkommenden Drucks
-    def get_pressure_median(self):
-        start_index, end_index = self.get_ventilation_start_end()
-
+    def get_pressure_threshold_value(self, start_index, end_index):
         # Druckwerte >= 1 werden in Liste pressure_values durch List Comprehension gespeichert
         pressure_values = [i for i in self.mask_edf_data[0, start_index:end_index] if i >= 1]
         pressure_median = statistics.median(pressure_values)
 
-        pressure_median_limit = pressure_median + (0.6 * pressure_median)
+        threshold_value = pressure_median + (0.6 * pressure_median)
 
-        return pressure_median_limit
+        return threshold_value
 
     # Funktion zur Ermittlung der einzelnen Atemzüge
     def get_breaths(self):
@@ -196,24 +193,24 @@ class AtemzugValidierungBreaths:
         # Start- und Endpunkt. Ab wo bis wo werden Atemzüge erfasst
         start_index, end_index = self.get_ventilation_start_end()
         # Schwellwert wird berechnet
-        self.pressure_median = self.get_pressure_median()
+        self.threshold_value = self.get_pressure_threshold_value(start_index, end_index)
 
         for i in range(start_index, end_index):
-            if self.mask_edf_data[0, i] >= self.pressure_median and self.mask_edf_data[0, i + 1] > self.pressure_median:
+            if self.mask_edf_data[0, i] >= self.threshold_value and self.mask_edf_data[0, i + 1] > self.threshold_value:
                 if not breathing:
                     breathing = True
-                    breath_start = i / 100
+                    breath_start = i / self.mask_sampling_frequency
             elif breathing:
-                breath_end = i / 100
+                breath_end = i / self.mask_sampling_frequency
                 # Aufzeichnung von atemzügen, welche mindesten 0,2 Sek lang sind
                 if breath_end - breath_start >= 0.2:
-                    # setzt Status und Kommentar für alle Atemzüge in den ersten 5 Minuten fest
-                    if breath_start < ((start_index / 100) + 300):
+                    # setzt Status und Kommentar für alle Atemzüge in den ersten 5 Minuten (300 Sekunden) fest
+                    if breath_start < ((start_index / self.mask_sampling_frequency) + 300):
                         value_status = 0
                         value_comment = "Atemzug befindet sich innerhalb der ersten 5 Minuten!"
 
-                    # setzt Status und Kommentar für alle Atemzüge in den letzten 5 Minuten fest
-                    if breath_start > ((end_index / 100) - 300):
+                    # setzt Status und Kommentar für alle Atemzüge in den letzten 5 Minuten (300 Sekunden) fest
+                    if breath_start > ((end_index / self.mask_sampling_frequency) - 300):
                         value_status = 0
                         value_comment = "Atemzug befindet sich innerhalb der letzten 5 Minuten!"
 
