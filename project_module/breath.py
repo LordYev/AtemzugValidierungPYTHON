@@ -119,12 +119,12 @@ class AtemzugValidierungBreaths:
         # durchläuft von links nach rechts
         if reversed_func is False:
             if ventilation_area_border is not None:
-                for i in range(ventilation_area_border, min(ventilation_area_border + 10000, len(self.mask_edf_data[0]))):
+                for i in range(ventilation_area_border, ventilation_area_border + int(100 * self.mask_sampling_frequency)):
                     pressure_test_values.append(self.mask_edf_data[0, i])
         # durchläuft von rechts nach links
         elif reversed_func is True:
             if ventilation_area_border is not None:
-                for j in reversed(range(max(ventilation_area_border - 10000, 0), ventilation_area_border)):
+                for j in reversed(range(ventilation_area_border - int(100 * self.mask_sampling_frequency), ventilation_area_border)):
                     pressure_test_values.append(self.mask_edf_data[0, j])
 
         pressure_values_sum = sum(pressure_test_values)
