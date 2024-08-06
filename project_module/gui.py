@@ -642,7 +642,7 @@ class AtemzugValidierungGUI(tk.Tk):
                         self.fast_forwards_button.config(state="disabled")
                         break
 
-            # wird ausgeführt, wenn self.fast_forward == True ist
+            # wird ausgeführt, wenn self.fast_backward == True ist
             if self.fast_backward:
                 index = first_data[0] - 1
                 # sucht die vorherige Anomalie und ermittelt die Dauer bis zu dieser

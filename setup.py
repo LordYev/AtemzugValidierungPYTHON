@@ -6,7 +6,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="AtemzugValidierung",
-    version="1.3.4",
+    version="1.3.5",
     packages=find_packages(),
     install_requires=requirements,
     entry_points={

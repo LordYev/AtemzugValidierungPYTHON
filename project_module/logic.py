@@ -61,7 +61,6 @@ class AtemzugValidierungLogic:
             # Start- und Endindex für Mask- und Device-Kurve berechnen (Zeitpunkt * Abtastrate)
             mask_start_index = int(starting_point * self.mask_sampling_frequency)
             mask_end_index = int(end_point * self.mask_sampling_frequency)
-
             device_start_index = int((starting_point - self.time_difference_start) * self.device_sampling_frequency)
             device_end_index = int((end_point - self.time_difference_end) * self.device_sampling_frequency)
 
@@ -90,7 +89,7 @@ class AtemzugValidierungLogic:
             ax.plot(adapted_device_interval, self.device_edf_data[0, device_start_index:device_end_index][:min_length], label="Device", color="red")
             ax.axhline(self.pressure_median, label="Schwellenwert", color="green", linestyle="dashed")
 
-            # Wenn die übergebenen Variablen Zeitpunkte haben, dann soll dort jeweils eine Senkrechte Linie geplottet werden
+            # Wenn die übergebenen Variablen Zeitpunkte haben, dann soll dort jeweils eine vertikale Linie geplottet werden
             if breath_start and breath_end is not None:
                 ax.axvline(float(breath_start), color='cyan')
                 ax.axvline(float(breath_end), color='orange')
@@ -100,8 +99,8 @@ class AtemzugValidierungLogic:
 
             # Aktualisierung des Labels zum Anzeigen der aktuellen Intervalldauer
             ax.set_xlabel(f"Zeit in Sekunden (aktuelle Intervalldauer: {int(self.interval)}sek)")
-
             ax.legend(loc="upper center", ncol=3)
+
             # Aktualisiert das Plot Fenster
             plt.draw()
 

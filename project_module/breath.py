@@ -32,7 +32,7 @@ class AtemzugValidierungBreaths:
             pressure_list.append(self.mask_edf_data[0, i])
 
         # höchster Druckwert wird ermittelt
-        pressure_max = np.max(pressure_list)
+        pressure_max = max(pressure_list)
 
         return pressure_max
 
@@ -177,6 +177,7 @@ class AtemzugValidierungBreaths:
         pressure_values = [i for i in self.mask_edf_data[0, start_index:end_index] if i >= 1]
         pressure_median = statistics.median(pressure_values)
 
+        # Erhöhung des Schwellenwertes um 60 %
         threshold_value = pressure_median + (0.6 * pressure_median)
 
         return threshold_value
