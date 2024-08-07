@@ -10,13 +10,14 @@ import csv
 class AtemzugValidierungGUI(tk.Tk):
     # Konstruktor der Klasse AtemzugValidierungGUI()
     def __init__(self, master=None):
-        super().__init__(master)  # erstellt das Hauptfenster "self"
+        super().__init__(master)                # erstellt das Hauptfenster "self"
         self.logic = AtemzugValidierungLogic()
         self.breath = AtemzugValidierungBreaths()
         self.mask_edf_path = None
-        self.device_edf_path = None  # Instanzvariable um den Pfad der EDF-Datei speichern
-        self.title("Atemzug Validierung")  # legt Titel für Hauptfenster fest
-        self.geometry("950x1000")  # legt Fenster größe fest (Breite x Höhe)
+        self.device_edf_path = None             # Instanzvariable um den Pfad der EDF-Datei speichern
+        self.title("Atemzug Validierung")       # legt Titel für Hauptfenster fest
+        self.minsize(950, 950)                  # legt minimale Fenster größe fest (Breite x Höhe)
+        self.grid_columnconfigure(5, weight=1)  # Grid-Elemente >=5 Spalten passen sich der Fensterbreite proportional an
         self.starting_point = None
         self.forward = False
         self.backward = False
@@ -340,7 +341,7 @@ class AtemzugValidierungGUI(tk.Tk):
     # Funktion um das Plot-Fenster zu erzeugen und zu platzieren
     def update_canvas(self):
         canvas = self.logic.canvas.get_tk_widget()
-        canvas.grid(row=2, column=0, columnspan=10, padx=5, pady=5, sticky='w')
+        canvas.grid(row=2, column=0, columnspan=10, padx=5, pady=5, sticky="ew")
 
     # Funktion zum Auswählen eines Ordners mit zwei EDF-Dateien (mask.edf & device.edf)
     def load_edf_files(self, folder_path_text):
@@ -762,22 +763,22 @@ class AtemzugValidierungGUI(tk.Tk):
         label.pack(padx=5, pady=5)
 
         start_label = tk.Label(first_bottom_frame, text="Start:")
-        start_label.pack(side='left', padx=5, pady=5)
+        start_label.pack(side="left", padx=5, pady=5)
 
         start_analyses_index_entry = tk.Entry(first_bottom_frame, width=8)
-        start_analyses_index_entry.pack(side='left', padx=5, pady=5)
+        start_analyses_index_entry.pack(side="left", padx=5, pady=5)
 
         end_label = tk.Label(first_bottom_frame, text="Ende:")
-        end_label.pack(side='left', padx=5, pady=5)
+        end_label.pack(side="left", padx=5, pady=5)
 
         end_analyses_index_entry = tk.Entry(first_bottom_frame, width=8)
-        end_analyses_index_entry.pack(side='left', padx=5, pady=5)
+        end_analyses_index_entry.pack(side="left", padx=5, pady=5)
 
         confirm_button = tk.Button(second_bottom_frame, text="Bestätigen", command=lambda: close_window())
-        confirm_button.pack(side='left', padx=5, pady=5)
+        confirm_button.pack(side="left", padx=5, pady=5)
 
         cancel_button = tk.Button(second_bottom_frame, text="Abbrechen", command=lambda: input_window.destroy())
-        cancel_button.pack(side='left', padx=5, pady=5)
+        cancel_button.pack(side="left", padx=5, pady=5)
 
         input_window.lift(self)
         input_window.after(100, lambda: input_window.lift(self))
@@ -824,7 +825,7 @@ class AtemzugValidierungGUI(tk.Tk):
 
     # Funktion erstellt CSV Datei
     def export_to_csv(self, path, data):
-        with open(path, mode='w', newline='') as csvfile:
+        with open(path, mode="w", newline="") as csvfile:
             writer = csv.writer(csvfile, delimiter=";")
             writer.writerow(self.column_headers)
             for row in data:

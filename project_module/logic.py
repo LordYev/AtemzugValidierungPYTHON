@@ -1,6 +1,7 @@
 import numpy as np  # numpy ist eine Bibliothek für numerische Berechnungen in Python
 import matplotlib.pyplot as plt  # Bibliothek für die Erstellung von Grafiken und Diagrammen in Python
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.ticker import MaxNLocator
 import mne
 
 
@@ -91,8 +92,8 @@ class AtemzugValidierungLogic:
 
             # Wenn die übergebenen Variablen Zeitpunkte haben, dann soll dort jeweils eine vertikale Linie geplottet werden
             if breath_start and breath_end is not None:
-                ax.axvline(float(breath_start), color='cyan')
-                ax.axvline(float(breath_end), color='orange')
+                ax.axvline(float(breath_start), color="cyan")
+                ax.axvline(float(breath_end), color="orange")
 
             # Setzt die Grenzen der x-Achse entsprechend den Zeitintervallen
             ax.set_xlim(adapted_mask_interval[0], adapted_device_interval[-1])
