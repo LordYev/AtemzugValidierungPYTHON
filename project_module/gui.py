@@ -296,7 +296,7 @@ class AtemzugValidierungGUI(tk.Tk):
         frame.grid(row=5, column=0, columnspan=5, padx=5, pady=5, sticky="nsew")
 
         self.breath_list_area = ttk.Treeview(frame, columns=("column_number", "column_start", "column_end",
-                                                             "column_is_breath", "column_comment"), height=15)
+                                                             "column_breath_status", "column_comment"), height=15)
         # Positionswert für GUI Element
         button_width = 12
         # Positionswert für GUI Element wird auf Windows-System angepasst
@@ -315,14 +315,14 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath_list_area.column("column_number", anchor="e", width=40, minwidth=40)
         self.breath_list_area.column("column_start", anchor="e", width=100, minwidth=100)
         self.breath_list_area.column("column_end", anchor="e", width=100, minwidth=100)
-        self.breath_list_area.column("column_is_breath", anchor="e", width=70, minwidth=70)
+        self.breath_list_area.column("column_breath_status", anchor="e", width=70, minwidth=70)
         self.breath_list_area.column("column_comment", anchor="w", width=600, minwidth=600)
 
         # self.breath_list_area.heading("#0", text="Test", anchor="w")
         self.breath_list_area.heading("column_number", text=self.column_headers[0], anchor="w")
         self.breath_list_area.heading("column_start", text=self.column_headers[1], anchor="w")
         self.breath_list_area.heading("column_end", text=self.column_headers[2], anchor="w")
-        self.breath_list_area.heading("column_is_breath", text=self.column_headers[3], anchor="w")
+        self.breath_list_area.heading("column_breath_status", text=self.column_headers[3], anchor="w")
         self.breath_list_area.heading("column_comment", text=self.column_headers[4], anchor="w")
 
         scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=self.breath_list_area.yview)
@@ -416,14 +416,14 @@ class AtemzugValidierungGUI(tk.Tk):
 
     # Funktion welche beim Doppelklick auf die Spalte "Kommentar" ausgeführt wird
     def on_breath_double_click(self, event):
-        selected_item = self.breath_list_area.selection()[0]
+        selected_id = self.breath_list_area.selection()[0]
         affected_column = self.breath_list_area.identify_column(event.x)
         if affected_column == "#5":
             # Koordinaten der ausgewählten Spalte werden ermittelt
-            x, y, width, height = self.breath_list_area.bbox(selected_item, affected_column)
-            comment_value = self.breath_list_area.item(selected_item, "values")[4]
+            x, y, width, height = self.breath_list_area.bbox(selected_id, affected_column)
+            comment_value = self.breath_list_area.item(selected_id, "values")[4]
 
-            breath_number = self.breath_list_area.item(selected_item, "values")[0]
+            breath_number = self.breath_list_area.item(selected_id, "values")[0]
             selected_index = int(breath_number) - 1
 
             entry = tk.Entry(self.breath_list_area)
@@ -456,9 +456,9 @@ class AtemzugValidierungGUI(tk.Tk):
                     return data
 
                 # zeigt neuen statt alten Kommentar nach Speicherung in Liste an
-                selected_data = list(self.breath_list_area.item(selected_item, "values"))
+                selected_data = list(self.breath_list_area.item(selected_id, "values"))
                 new_data = get_new_data(selected_data, new_comment_value)
-                self.breath_list_area.item(selected_item, values=new_data)
+                self.breath_list_area.item(selected_id, values=new_data)
 
                 # ändert und speichert Kommentar in Atemzugliste (breath_list)
                 # ausgewähltes Tupel in breath_list wird zur Liste konvertiert
@@ -783,11 +783,11 @@ class AtemzugValidierungGUI(tk.Tk):
         input_window.after(100, lambda: input_window.lift(self))
 
     def set_data_to_invalid(self):
-        selected_item = self.breath_list_area.selection()[0]
-        actual_temp_data = list(self.breath_list_area.item(selected_item, "values"))
+        selected_id = self.breath_list_area.selection()[0]
+        actual_temp_data = list(self.breath_list_area.item(selected_id, "values"))
         actual_temp_data[3] = 0
         actual_temp_data[4] = "kein Atemzug!"
-        self.breath_list_area.item(selected_item, values=actual_temp_data)
+        self.breath_list_area.item(selected_id, values=actual_temp_data)
 
         actual_data = list(self.breath.breath_list[self.selected_breath_index])
         actual_data[3] = 0
@@ -823,12 +823,12 @@ class AtemzugValidierungGUI(tk.Tk):
         return breath_list_commented
 
     # Funktion erstellt CSV Datei
-    def export_to_csv(self, filename, data):
-        with open(filename, mode='w', newline='') as file:
-            writer = csv.writer(file, delimiter=";")
+    def export_to_csv(self, path, data):
+        with open(path, mode='w', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=";")
             writer.writerow(self.column_headers)
             for row in data:
-                writer.writerow(list(row))
+                writer.writerow(row)
 
     # Funktion exportiert übergebene Listen in CSV Dateien
     def export_list(self):
@@ -837,9 +837,7 @@ class AtemzugValidierungGUI(tk.Tk):
         self.breath.breath_list_commented_data = self.get_commented_data()
 
         # öffnet Dialogfenster, wo man den Speicherort auswählen kann
-        folder_path = filedialog.askdirectory(
-            title="Speicherort auswählen"
-        )
+        folder_path = filedialog.askdirectory(title="Speicherort auswählen")
 
         # wenn Speicherort ausgewählt wurde, werden alle Dateien dort abgelegt
         if folder_path:

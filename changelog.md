@@ -1,3 +1,6 @@
+# Version 1.3.6 - 07.08.2024
+1. Code Anpassungen (keine funktionalen Änderungen)
+
 # Version 1.3.5 - 06.08.2024
 1. Code Anpassungen (keine funktionalen Änderungen)
 
