@@ -1,4 +1,4 @@
-# Version 1.4 - 08.08.2024
+# Version 1.5 - 08.08.2024
 
 # Installation
 1. Dateien aus GitHub herunterladen und in gewünschtem Verzeichnis ablegen
