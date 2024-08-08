@@ -1,6 +1,7 @@
 # Version 1.4 - 08.08.2024
 1. Code Anpassungen 
    - Plot-Fenster Breite passt sich der Breite des Hauptfensters an.
+   - Plot-Größe wurde erweitert
 
 # Version 1.3.6 - 07.08.2024
 1. Code Anpassungen (keine funktionalen Änderungen)

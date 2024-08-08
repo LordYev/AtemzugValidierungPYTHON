@@ -191,6 +191,7 @@ class AtemzugValidierungLogic:
         ax.set_ylim(self.y_min, self.y_max)
         ax.set_ylabel("Druck in mbar")
         ax.set_xlabel("Zeit in Sekunden")
+        fig.tight_layout()
         ax.grid(True)
 
         # Setze die Schritte für die y-Achse auf 2,5
