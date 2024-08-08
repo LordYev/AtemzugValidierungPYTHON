@@ -1,3 +1,6 @@
+# Version 1.5.1 - 08.08.2024
+1. Code Anpassungen (keine funktionalen Änderungen)
+
 # Version 1.5 - 08.08.2024
 1. Code Anpassungen 
    - Plot-Größe wurde erweitert

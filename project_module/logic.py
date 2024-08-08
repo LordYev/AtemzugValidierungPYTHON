@@ -1,7 +1,6 @@
 import numpy as np  # numpy ist eine Bibliothek für numerische Berechnungen in Python
 import matplotlib.pyplot as plt  # Bibliothek für die Erstellung von Grafiken und Diagrammen in Python
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.ticker import MaxNLocator
 import mne
 
 
