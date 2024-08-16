@@ -27,7 +27,7 @@ class AtemzugValidierungBreaths:
         end_index = int(end_index * self.mask_sampling_frequency)
         pressure_list = []
         # ermittelt jeden Druckwert zwischen Start und Ende, speichert diese in Liste pressure_list ab
-        for i in range(start_index, end_index):
+        for i in range(start_index, end_index + 1):
             pressure_list.append(self.mask_edf_data[0, i])
 
         # höchster Druckwert wird ermittelt

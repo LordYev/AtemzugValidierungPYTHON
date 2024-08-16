@@ -1,3 +1,7 @@
+# Version 1.6 - 16.08.2024
+1. Peak Ermittlung der einzelnen Atemzüge wurde um 1 Index erhöht, um gesamten Atemzug 
+zu betrachten
+
 # Version 1.5.1 - 08.08.2024
 1. Code Anpassungen (keine funktionalen Änderungen)
 
