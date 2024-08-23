@@ -15,8 +15,8 @@ setup(
         ],
     },
     author="Yevgeniy Gennadijovic Palamarchuk",
-    description="Programm zum validieren einzelner Atemzüge",
+    description="Anwendung zum Validieren einzelner Atemzüge",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    python_requires=">=3.6"
+    python_requires=">=3.8"
 )
